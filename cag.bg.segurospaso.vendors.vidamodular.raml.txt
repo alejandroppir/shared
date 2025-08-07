@@ -1,0 +1,2782 @@
+﻿#%RAML 1.0
+title: "API para la gestión de particularidades de los seguros para vida modular dentro de la plataforma PASO (Plataforma Abanca Seguros Omnicanal)"
+version: "v1"
+baseUri: "http://dcaplicaciones/mrph106/mocker/cag.bg.segurospaso.vendors.vidamodular"
+protocols: [HTTP,HTTPS]
+schemas:
+  - capital: |
+      {
+        "properties": {
+          "codigo": {
+            "title": "codigo",
+            "type": "string"
+          },
+          "descripcion": {
+            "title": "descripcion",
+            "type": "string"
+          },
+          "importeCapital": {
+            "title": "importeCapital",
+            "$ref": "#/schemas/importe"
+          },
+          "recomendado": {
+            "title": "recomendado",
+            "type": "boolean"
+          }
+        },
+        "description": "",
+        "title": "capital",
+        "type": "object"
+      }
+  - capitalPostRequest: |
+      {
+        "type": "object",
+        "title": "capitalPostRequest",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/capitalPostRequestData"
+          }
+        },
+        "description": ""
+      }
+  - capitalPostRequestAttributes: |
+      {
+        "description": "",
+        "title": "capitalPostRequestAttributes",
+        "type": "object",
+        "properties": {
+          "identificadorDeOportunidad": {
+            "title": "identificadorDeOportunidad",
+            "type": "string"
+          }
+        }
+      }
+  - capitalPostRequestData: |
+      {
+        "type": "object",
+        "title": "capitalPostRequestData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "capitalPostRequest",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/capitalPostRequestAttributes"
+          }
+        },
+        "description": "<i>Resource Object</i> capitalPostRequest"
+      }
+  - capitalResponse: |
+      {
+        "type": "object",
+        "title": "capitalResponse",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/capitalResponseData"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": ""
+      }
+  - capitalResponseAttributes: |
+      {
+        "description": "",
+        "title": "capitalResponseAttributes",
+        "type": "object",
+        "properties": {
+          "identificadorDeOportunidad": {
+            "title": "identificadorDeOportunidad",
+            "type": "integer"
+          },
+          "capitales": {
+            "title": "capitales",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/capital"
+            }
+          }
+        }
+      }
+  - capitalResponseCollection: |
+      {
+        "type": "object",
+        "title": "capitalResponseCollection",
+        "properties": {
+          "data": {
+            "title": "data",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/capitalResponseData"
+            }
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkCollectionObject"
+          }
+        }
+      }
+  - capitalResponseData: |
+      {
+        "type": "object",
+        "title": "capitalResponseData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "capitalResponse",
+            "type": "string"
+          },
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/capitalResponseAttributes"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": "<i>Resource Object</i> capitalResponse"
+      }
+  - coberturaAttributes: |
+      {
+        "properties": {
+          "codigo": {
+            "title": "codigo",
+            "type": "string"
+          },
+          "capital": {
+            "title": "capital",
+            "type": "number"
+          }
+        },
+        "description": "",
+        "title": "coberturaAttributes",
+        "type": "object"
+      }
+  - documentoIdentificativo: |
+      {
+        "type": "object",
+        "title": "documentoIdentificativo",
+        "properties": {
+          "tipoDeDocumentoIdentificativo": {
+            "title": "tipoDeDocumentoIdentificativo",
+            "description": "tipo de documento identificativo",
+            "type": "string"
+          },
+          "codigoDeDocumentoIdentificativo": {
+            "title": "codigoDeDocumentoIdentificativo",
+            "description": "documento que identifica",
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "description": ""
+      }
+  - errorObject: |
+      {
+        "type": "object",
+        "title": "errorObject",
+        "properties": {
+          "id": {
+            "title": "id",
+            "description": "Identificador interno del error",
+            "type": "string"
+          },
+          "links": {
+            "title": "links",
+            "description": "<i>Links object </i> que contienen el <i>link object</i> about que es una URL que contiene detalles especificos del error en particular.",
+            "$ref": "#/schemas/linkErrorObject"
+          },
+          "code": {
+            "title": "code",
+            "description": "código de error especifico del API",
+            "type": "string"
+          },
+          "title": {
+            "title": "title",
+            "required": true,
+            "description": "Título del error. No cambia entre distintas ocurrencias del problema. ",
+            "type": "string"
+          },
+          "detail": {
+            "title": "detail",
+            "required": true,
+            "description": "Detalle del error en el API. No cambia si se debe a un misma ocurrencia.",
+            "type": "string"
+          },
+          "source": {
+            "title": "source",
+            "description": "Objecto que contiene referencias al recurso donde se produjo la ocurrencia.",
+            "$ref": "#/schemas/source"
+          }
+        }
+      }
+  - errorsObject: |
+      {
+        "type": "object",
+        "title": "errorsObject",
+        "properties": {
+          "errors": {
+            "title": "errors",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/errorObject"
+            }
+          }
+        },
+        "description": "Esquema para objeto error JSONAPI"
+      }
+  - horariosDeReconocimientosMedicoRequest: |
+      {
+        "type": "object",
+        "title": "horariosDeReconocimientosMedicoRequest",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/horariosDeReconocimientosMedicoRequestData"
+          }
+        },
+        "description": ""
+      }
+  - horariosDeReconocimientosMedicoRequestAttributes: |
+      {
+        "properties": {
+          "nuc": {
+            "title": "nuc",
+            "type": "integer"
+          },
+          "horario": {
+            "title": "horario",
+            "type": "string"
+          }
+        },
+        "description": "",
+        "title": "horariosDeReconocimientosMedicoRequestAttributes",
+        "type": "object"
+      }
+  - horariosDeReconocimientosMedicoRequestData: |
+      {
+        "type": "object",
+        "title": "horariosDeReconocimientosMedicoRequestData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "horariosDeReconocimientosMedicoRequest",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/horariosDeReconocimientosMedicoRequestAttributes"
+          }
+        },
+        "description": "<i>Resource Object</i> horariosDeReconocimientosMedicoRequest"
+      }
+  - importe: |
+      {
+        "type": "object",
+        "title": "importe",
+        "properties": {
+          "cantidad": {
+            "title": "cantidad",
+            "type": "number"
+          },
+          "divisa": {
+            "title": "divisa",
+            "type": "string"
+          }
+        },
+        "description": ""
+      }
+  - importeDeValor: |
+      {
+        "type": "object",
+        "title": "importeDeValor",
+        "properties": {
+          "cantidad": {
+            "title": "cantidad",
+            "type": "number"
+          },
+          "divisa": {
+            "title": "divisa",
+            "type": "string"
+          },
+          "contravalor": {
+            "title": "contravalor",
+            "type": "number"
+          },
+          "fixing": {
+            "title": "fixing",
+            "type": "number"
+          }
+        },
+        "description": ""
+      }
+  - importeDeValorSinFixing: |
+      {
+        "type": "object",
+        "title": "importeDeValorSinFixing",
+        "properties": {
+          "cantidad": {
+            "title": "cantidad",
+            "type": "number"
+          },
+          "divisa": {
+            "title": "divisa",
+            "type": "string"
+          },
+          "contravalor": {
+            "title": "contravalor",
+            "type": "number"
+          }
+        },
+        "description": ""
+      }
+  - linkCollectionObject: |
+      {
+        "type": "object",
+        "title": "linkCollectionObject",
+        "properties": {
+          "self": {
+            "title": "self",
+            "format": "uri",
+            "type": "string"
+          },
+          "first": {
+            "title": "first",
+            "format": "uri",
+            "type": "string"
+          },
+          "next": {
+            "title": "next",
+            "format": "uri",
+            "type": "string"
+          },
+          "prev": {
+            "title": "prev",
+            "format": "uri",
+            "type": "string"
+          },
+          "last": {
+            "title": "last",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "description": "<i>Links objects</i> para recursos tipo coleciones"
+      }
+  - linkErrorObject: |
+      {
+        "type": "object",
+        "title": "newSchema",
+        "properties": {
+          "about": {
+            "title": "about",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "description": ""
+      }
+  - linkResourceObject: |
+      {
+        "type": "object",
+        "title": "newSchema",
+        "properties": {
+          "self": {
+            "title": "self",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "description": ""
+      }
+  - local: |
+      {
+        "properties": {
+          "tipoDeVia": {
+            "title": "tipoDeVia",
+            "type": "string"
+          },
+          "nombreDeVia": {
+            "title": "nombreDeVia",
+            "type": "string"
+          },
+          "numeroDeVia": {
+            "title": "numeroDeVia",
+            "type": "integer"
+          },
+          "codigoPostal": {
+            "title": "codigoPostal",
+            "type": "integer"
+          },
+          "poblacion": {
+            "title": "poblacion",
+            "type": "string"
+          },
+          "provincia": {
+            "title": "provincia",
+            "type": "string"
+          },
+          "anhoDeConstruccion": {
+            "title": "anhoDeConstruccion",
+            "type": "integer"
+          },
+          "anhoDeLaUltimaReforma": {
+            "title": "anhoDeLaUltimaReforma",
+            "type": "integer"
+          },
+          "superficie": {
+            "title": "superficie",
+            "type": "integer"
+          },
+          "altura": {
+            "title": "altura",
+            "type": "string"
+          }
+        },
+        "description": "",
+        "title": "local",
+        "type": "object"
+      }
+  - progresionEconomicaResponse: |
+      {
+        "type": "object",
+        "title": "progresionEconomicaResponse",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/progresionEconomicaResponseData"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": ""
+      }
+  - progresionEconomicaResponseAttributes: |
+      {
+        "description": "",
+        "title": "progresionEconomicaResponseAttributes",
+        "type": "object",
+        "properties": {
+          "identificadorDeOportunidad": {
+            "title": "identificadorDeOportunidad",
+            "type": "integer"
+          },
+          "anho": {
+            "title": "anho",
+            "type": "integer"
+          },
+          "ingresosConyuge": {
+            "title": "ingresosConyuge",
+            "$ref": "#/schemas/importe"
+          },
+          "ingresosViudedad": {
+            "title": "ingresosViudedad",
+            "$ref": "#/schemas/importe"
+          },
+          "ingresosOrfandad": {
+            "title": "ingresosOrfandad",
+            "$ref": "#/schemas/importe"
+          },
+          "ingresosOrfandadComplemento": {
+            "title": "ingresosOrfandadComplemento",
+            "$ref": "#/schemas/importe"
+          },
+          "ingresosInvalidez": {
+            "title": "ingresosInvalidez",
+            "$ref": "#/schemas/importe"
+          },
+          "ingresosActuales": {
+            "title": "ingresosActuales",
+            "$ref": "#/schemas/importe"
+          },
+          "perdidaDeIngresos": {
+            "title": "perdidaDeIngresos",
+            "$ref": "#/schemas/importe"
+          },
+          "capitalNecesario": {
+            "title": "capitalNecesario",
+            "$ref": "#/schemas/importe"
+          }
+        }
+      }
+  - progresionEconomicaResponseCollection: |
+      {
+        "type": "object",
+        "title": "progresionEconomicaResponseCollection",
+        "properties": {
+          "data": {
+            "title": "data",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/progresionEconomicaResponseData"
+            }
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkCollectionObject"
+          }
+        }
+      }
+  - progresionEconomicaResponseData: |
+      {
+        "type": "object",
+        "title": "progresionEconomicaResponseData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "progresionEconomicaResponse",
+            "type": "string"
+          },
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/progresionEconomicaResponseAttributes"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": "<i>Resource Object</i> progresionEconomicaResponse"
+      }
+  - simulacionRequest: |
+      {
+        "type": "object",
+        "title": "simulacionRequest",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/simulacionRequestData"
+          }
+        },
+        "description": ""
+      }
+  - simulacionRequestAttributes: |
+      {
+        "properties": {
+          "identificadorDeOportunidad": {
+            "title": "identificadorDeOportunidad",
+            "type": "integer"
+          },
+          "codigoDePersonaIone": {
+            "title": "codigoDePersonaIone",
+            "required": true,
+            "type": "string"
+          },
+          "codigoDeDeporte": {
+            "title": "codigoDeDeporte",
+            "required": true,
+            "type": "string"
+          },
+          "codigoDeProfesion": {
+            "title": "codigoDeProfesion",
+            "required": true,
+            "type": "string"
+          },
+          "coberturas": {
+            "title": "coberturas",
+            "required": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/coberturaAttributes"
+            }
+          },
+          "recargoElastico": {
+            "title": "recargoElastico",
+            "type": "number"
+          },
+          "recargoTecnico": {
+            "title": "recargoTecnico",
+            "type": "number"
+          },
+          "numeroDeRenovaciones": {
+            "title": "numeroDeRenovaciones",
+            "required": true,
+            "type": "number"
+          }
+        },
+        "description": "",
+        "title": "simulacionRequestAttributes",
+        "type": "object"
+      }
+  - simulacionRequestData: |
+      {
+        "type": "object",
+        "title": "simulacionRequestData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "simulacionRequest",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/simulacionRequestAttributes"
+          }
+        },
+        "description": "<i>Resource Object</i> simulacionRequest"
+      }
+  - simulacionResponse: |
+      {
+        "type": "object",
+        "title": "simulacionResponse",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/simulacionResponseData"
+          }
+        },
+        "description": ""
+      }
+  - simulacionResponseAttributes: |
+      {
+        "properties": {
+          "primaTarTotal": {
+            "title": "primaTarTotal",
+            "type": "number"
+          },
+          "primaTarAnho1": {
+            "title": "primaTarAnho1",
+            "type": "number"
+          },
+          "primaTarAnho2": {
+            "title": "primaTarAnho2",
+            "type": "number"
+          },
+          "primaTarAnho3": {
+            "title": "primaTarAnho3",
+            "type": "number"
+          },
+          "primaTarAnho4": {
+            "title": "primaTarAnho4",
+            "type": "number"
+          },
+          "primaTarAnho5": {
+            "title": "primaTarAnho5",
+            "type": "number"
+          },
+          "primaPu": {
+            "title": "primaPu",
+            "type": "number"
+          }
+        },
+        "description": "",
+        "title": "simulacionResponseAttributes",
+        "type": "object"
+      }
+  - simulacionResponseData: |
+      {
+        "type": "object",
+        "title": "simulacionResponseData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "simulacionResponseData",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/simulacionResponseAttributes"
+          }
+        },
+        "description": "<i>Resource Object</i> newSchema"
+      }
+  - situacionActualDelEstudioResponse: |
+      {
+        "type": "object",
+        "title": "situacionActualDelEstudioResponse",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/situacionActualDelEstudioResponseData"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": ""
+      }
+  - situacionActualDelEstudioResponseAttributes: |
+      {
+        "description": "",
+        "title": "situacionActualDelEstudioResponseAttributes",
+        "type": "object",
+        "properties": {
+          "codigoDePoliza": {
+            "title": "codigoDePoliza",
+            "type": "string"
+          },
+          "codigoDeSituacion": {
+            "title": "codigoDeSituacion",
+            "type": "string"
+          }
+        }
+      }
+  - situacionActualDelEstudioResponseCollection: |
+      {
+        "type": "object",
+        "title": "situacionActualDelEstudioResponseCollection",
+        "properties": {
+          "data": {
+            "title": "data",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/situacionActualDelEstudioResponseData"
+            }
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkCollectionObject"
+          }
+        }
+      }
+  - situacionActualDelEstudioResponseData: |
+      {
+        "type": "object",
+        "title": "situacionActualDelEstudioResponseData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "situacionActualDelEstudioResponse",
+            "type": "string"
+          },
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/situacionActualDelEstudioResponseAttributes"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": "<i>Resource Object</i> situacionActualDelEstudioResponse"
+      }
+  - sociedadResponse: |
+      {
+        "type": "object",
+        "title": "sociedadResponse",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/sociedadResponseData"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": ""
+      }
+  - sociedadResponseAttributes: |
+      {
+        "description": "",
+        "title": "sociedadResponseAttributes",
+        "type": "object",
+        "properties": {
+          "nif": {
+            "title": "nif",
+            "type": "string"
+          },
+          "denominacionSocial": {
+            "title": "denominacionSocial",
+            "type": "string"
+          },
+          "nombreComercial": {
+            "title": "nombreComercial",
+            "type": "string"
+          },
+          "codigoDeEstado": {
+            "title": "codigoDeEstado",
+            "type": "string"
+          },
+          "fechaDeConstitucion": {
+            "title": "fechaDeConstitucion",
+            "format": "date-time",
+            "type": "string"
+          },
+          "codigoDeCNAE": {
+            "title": "codigoDeCNAE",
+            "type": "string"
+          },
+          "descripcionDeCNAE": {
+            "title": "descripcionDeCNAE",
+            "type": "string"
+          },
+          "facturacionAnual": {
+            "title": "facturacionAnual",
+            "$ref": "#/schemas/importe"
+          },
+          "numeroDeEmpleados": {
+            "title": "numeroDeEmpleados",
+            "type": "integer"
+          },
+          "local": {
+            "title": "local",
+            "$ref": "#/schemas/local"
+          }
+        }
+      }
+  - sociedadResponseCollection: |
+      {
+        "type": "object",
+        "title": "sociedadResponseCollection",
+        "properties": {
+          "data": {
+            "title": "data",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/sociedadResponseData"
+            }
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkCollectionObject"
+          }
+        }
+      }
+  - sociedadResponseData: |
+      {
+        "type": "object",
+        "title": "sociedadResponseData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "sociedadResponse",
+            "type": "string"
+          },
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/sociedadResponseAttributes"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": "<i>Resource Object</i> sociedadResponse"
+      }
+  - source: |
+      {
+        "type": "object",
+        "title": "source",
+        "properties": {
+          "pointer": {
+            "title": "pointer",
+            "description": "Referencia al objeto.",
+            "type": "string"
+          },
+          "parameter": {
+            "title": "parameter",
+            "type": "string"
+          }
+        }
+      }
+  - tipoDeDeporteResponse: |
+      {
+        "type": "object",
+        "title": "tipoDeDeporteResponse",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/tipoDeDeporteResponseData"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": ""
+      }
+  - tipoDeDeporteResponseAttributes: |
+      {
+        "description": "",
+        "title": "tipoDeDeporteResponseAttributes",
+        "type": "object",
+        "properties": {
+          "codigoDeDeporte": {
+            "title": "codigoDeDeporte",
+            "type": "string"
+          },
+          "descripcionDeDeporte": {
+            "title": "descripcionDeDeporte",
+            "type": "string"
+          },
+          "tipoDeDeporte": {
+            "title": "tipoDeDeporte",
+            "type": "string"
+          }
+        }
+      }
+  - tipoDeDeporteResponseCollection: |
+      {
+        "type": "object",
+        "title": "tipoDeDeporteResponseCollection",
+        "properties": {
+          "data": {
+            "title": "data",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/tipoDeDeporteResponseData"
+            }
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkCollectionObject"
+          }
+        }
+      }
+  - tipoDeDeporteResponseData: |
+      {
+        "type": "object",
+        "title": "tipoDeDeporteResponseData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "tipoDeDeporteResponse",
+            "type": "string"
+          },
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/tipoDeDeporteResponseAttributes"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": "<i>Resource Object</i> tipoDeDeporteResponse"
+      }
+  - tipoDeProfesionResponse: |
+      {
+        "type": "object",
+        "title": "tipoDeProfesionResponse",
+        "properties": {
+          "data": {
+            "title": "data",
+            "$ref": "#/schemas/tipoDeProfesionResponseData"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": ""
+      }
+  - tipoDeProfesionResponseAttributes: |
+      {
+        "description": "",
+        "title": "tipoDeProfesionResponseAttributes",
+        "type": "object",
+        "properties": {
+          "codigoDeProfesion": {
+            "title": "codigoDeProfesion",
+            "type": "string"
+          },
+          "descripcionDeProfesion": {
+            "title": "descripcionDeProfesion",
+            "type": "string"
+          },
+          "tipoDeProfesion": {
+            "title": "tipoDeProfesion",
+            "type": "string"
+          }
+        }
+      }
+  - tipoDeProfesionResponseCollection: |
+      {
+        "type": "object",
+        "title": "tipoDeProfesionResponseCollection",
+        "properties": {
+          "data": {
+            "title": "data",
+            "type": "array",
+            "items": {
+              "$ref": "#/schemas/tipoDeProfesionResponseData"
+            }
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkCollectionObject"
+          }
+        }
+      }
+  - tipoDeProfesionResponseData: |
+      {
+        "type": "object",
+        "title": "tipoDeProfesionResponseData",
+        "properties": {
+          "type": {
+            "title": "type",
+            "required": true,
+            "default": "tipoDeProfesionResponse",
+            "type": "string"
+          },
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "attributes": {
+            "title": "attributes",
+            "$ref": "#/schemas/tipoDeProfesionResponseAttributes"
+          },
+          "links": {
+            "title": "links",
+            "$ref": "#/schemas/linkResourceObject"
+          }
+        },
+        "description": "<i>Resource Object</i> tipoDeProfesionResponse"
+      }
+traits:
+  - paginable:
+      description: "Trait para recursos paginables"
+      queryParameters:
+        pageSize:
+          description: "Número de <i>resource object</i>  por página."
+          type: integer
+          minimum: 1
+          example: "pageSize=1"
+          default: 20
+
+        pageNumber:
+          description: "Número de página"
+          type: integer
+          minimum: 1
+          example: "pageNumber=20"
+          default: 1
+
+  - includible:
+      description: "Trait para recuros que permitan incluir otros recursos"
+      queryParameters:
+        include:
+          description: "Parámetro para incluir los <i>resource objecto</i>  relacionados con el recurso. Si se quieren incluir todos los <i>resource object</i> relacionados el parámetro debe valer all."
+          type: string
+          example: "include=detail"
+  - sortable:
+      description: "Trait para recursos ordenables"
+      queryParameters:
+        sort:
+          description: "Parámetro para ordenar campos separados por comas. Por defecto el orden es ascendente. Si el campo lleva un signo + el orden es ascendente, y si lleva un signo - el orden es descendente."
+          type: string
+          example: "sort=-propiedad,propiedad"
+resourceTypes:
+  - collection:
+      description: "tipo de recurso colección"
+      get:
+        is: [paginable,sortable]
+        description: "Obtiene el recurso <<resourcePathName>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName>>
+          206:
+            description: "El recurso <<resourcePathName>> se recupero parcialmente."
+            body:
+              application/json:
+                schema: <<resourcePathName>>
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+                example: |
+                  {
+                    "errors" :   [
+                          {
+                            "id" :   "Foweh",
+                            "links" :     {
+                                  "about" :   "http://www.abanca.com"
+                                }
+                              ,
+                            "code" :   "AB005",
+                            "title" :   "Esto es un error",
+                            "detail" :   "Detalle del error",
+                            "source" :     {
+                                  "pointer" :   "/recurso",
+                                  "parameter" :   "/recurso/propiedad"
+                                }
+                              
+                          }
+                        ,
+                          {
+                            "id" :   "Beucbh",
+                            "links" :     {
+                                  "about" :   "http://www.abanca.com"
+                                }
+                              ,
+                            "code" :   "AB001",
+                            "title" :   "Esto es un error",
+                            "detail" :   "Detalle del error",
+                            "source" :     {
+                                  "pointer" :   "/recurso",
+                                  "parameter" :   "/recurso/propiedad"
+                                }
+                              
+                          }
+                        
+                      ]
+                  }
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "El acceso al recurso <<resourcePathName>> no está permitido"
+            body:
+              application/json:
+                schema: errorsObject
+      post:
+        description: "Creación de un recurso <<resourcePathName|!singularize>>"
+        body:
+          application/json:
+            schema: <<resourcePathName|!singularize>>
+        responses:
+          201:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido creado satisfactoriamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          202:
+            description: "La petición de creación de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido creado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+  - collectionGet:
+      description: "Tip de recurso para colecciones solo con get"
+      get:
+        is: [paginable,sortable]
+        description: "Obtiene el recurso <<resourcePathName>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName>>
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          206:
+            description: "El recurso <<resourcePathName>> se recupero parcialmente."
+            body:
+              application/json:
+                schema: <<resourcePathName>>
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "El acceso al recurso <<resourcePathName>> no está permitido"
+            body:
+              application/json:
+                schema: errorsObject
+  - collectionPost:
+      description: "Los recursos virtuales son coleciones que sólo permiten métodos POST"
+      post:
+        description: "Creación de un recurso <<resourcePathName|!singularize>>"
+        body:
+          application/json:
+            schema: object
+        responses:
+          201:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido creado satisfactoriamente"
+          202:
+            description: "La petición de creación de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido creado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+  - documentAll:
+      description: "Tipo de recurso document. Permite los verbos GET,PATCH,DELETE"
+      get:
+        description: "Obtiene el recurso <<resourcePathName|!singularize>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          400:
+            description: "La solicitud del recurso <<resourcePathName|!singularize>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName|!singularize>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "El acceso al recurso <<resourcePathName|singularize>> no está permitido"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+      patch:
+        description: "Actualiza el recurso <<resourcePathName|!singularize>>"
+        body:
+          application/json:
+            schema: <<resourcePathName|!singularize>>
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido actualizado satisfactoriamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          202:
+            description: "La petición de actualización de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+          400:
+            description: "La solicitud del recurso <<resourcePathName|!singularize>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName|!singularize>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          409:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido actualizado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+          428:
+            description: "Obligatorio incluir la cabecera If-None-Match"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+      delete:
+        description: "Borra el recurso <<resourcePathName|!singularize>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido eliminado."
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          409:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido borrado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+          428:
+            description: "Obligatorio incluir la cabecera If-None-Match"
+            body:
+              application/json:
+                schema: errorsObject
+          400:
+            description: "La solicitud del recurso<<resourcePathName|!singularize>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+  - documentGet:
+      description: "Tipo de recurso document. Permite sólo el  verbo GET."
+      get:
+        description: "Obtiene el recurso <<resourcePathName|!singularize>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          400:
+            description: "La solicitud del recurso <<resourcePathName|!singularize>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName|!singularize>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+  - documentGetPatch:
+      description: "Tipo de recurso document. Permite los verbos GET y PATCH."
+      get:
+        description: "Obtiene el recurso <<resourcePathName|!singularize>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+      patch:
+        description: "Actualiza el recurso <<resourcePathName|!singularize>>"
+        body:
+          application/json:
+            schema: <<resourcePathName|!singularize>>
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido actualizado satisfactoriamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          202:
+            description: "La petición de actualización de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          409:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido actualizado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+          428:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+  - collectionGetNoPaginable:
+      description: "Tip de recurso para colecciones solo con get sin paginación"
+      get:
+        description: "Obtiene el recurso <<resourcePathName>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName>> se recupero correctamente"
+            body:
+              application/json:
+                schema: object
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "El acceso al recurso <<resourcePathName>> no está permitido"
+            body:
+              application/json:
+                schema: errorsObject
+  - documentGetPut:
+      description: "Recurso  <<resourcePathName|!singularize>>"
+      get:
+        description: "Obtiene el recurso <<resourcePathName|!singularize>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+      put:
+        description: "Actualiza el recurso <<resourcePathName|!singularize>>"
+        body:
+          application/json:
+            schema: <<resourcePathName|!singularize>>
+        responses:
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          409:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido actualizado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+          428:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          200?:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido actualizado satisfactoriamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+          202?:
+            description: "La petición de actualización de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+  - collectionGetNo206:
+      description: "Tip de recurso para colecciones solo con get"
+      get:
+        is: [paginable,sortable]
+        description: "Obtiene el recurso <<resourcePathName>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!pluralize>>
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "El acceso al recurso <<resourcePathName>> no está permitido"
+            body:
+              application/json:
+                schema: errorsObject
+  - collectionNo206:
+      description: "tipo de recurso colección"
+      get:
+        is: [paginable,sortable]
+        description: "Obtiene el recurso <<resourcePathName>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName>> se recupero correctamente"
+            body:
+              application/json:
+                schema: <<resourcePathName|!pluralize>>
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+                example: |
+                  {
+                    "errors" :   [
+                          {
+                            "id" :   "Foweh",
+                            "links" :     {
+                                  "about" :   "http://www.abanca.com"
+                                }
+                              ,
+                            "code" :   "AB005",
+                            "title" :   "Esto es un error",
+                            "detail" :   "Detalle del error",
+                            "source" :     {
+                                  "pointer" :   "/recurso",
+                                  "parameter" :   "/recurso/propiedad"
+                                }
+                              
+                          }
+                        ,
+                          {
+                            "id" :   "Beucbh",
+                            "links" :     {
+                                  "about" :   "http://www.abanca.com"
+                                }
+                              ,
+                            "code" :   "AB001",
+                            "title" :   "Esto es un error",
+                            "detail" :   "Detalle del error",
+                            "source" :     {
+                                  "pointer" :   "/recurso",
+                                  "parameter" :   "/recurso/propiedad"
+                                }
+                              
+                          }
+                        
+                      ]
+                  }
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "El acceso al recurso <<resourcePathName>> no está permitido"
+            body:
+              application/json:
+                schema: errorsObject
+      post:
+        description: "Creación de un recurso <<resourcePathName|!singularize>>"
+        body:
+          application/json:
+            schema: errorsObject
+        responses:
+          201:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido creado satisfactoriamente"
+            body:
+              application/json:
+                schema: errorsObject
+          202:
+            description: "La petición de creación de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido creado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+  - documentGetDelete:
+      description: "Tipo de recurso document. Permite sólo el  verbo GET."
+      get:
+        description: "Obtiene el recurso <<resourcePathName|!singularize>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName|!singularize>> se recupero correctamente"
+          400:
+            description: "La solicitud del recurso <<resourcePathName|!singularize>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName|!singularize>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          422:
+            body:
+              application/json:
+                schema: errorsObject
+      delete:
+        responses:
+          400:
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            body:
+              application/json:
+                schema: errorsObject
+          200:
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+  - documentGetPutDelete:
+      description: "Recurso  <<resourcePathName|!singularize>>"
+      get:
+        description: "Obtiene el recurso <<resourcePathName|!singularize>>"
+        responses:
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          200:
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>
+      put:
+        description: "Actualiza el recurso <<resourcePathName|!singularize>>"
+        responses:
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          409:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido actualizado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+          428:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+            body:
+              application/json:
+                schema: errorsObject
+          200?:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido actualizado satisfactoriamente"
+            body:
+              application/json:
+                schema: errorsObject
+          202?:
+            description: "La petición de actualización de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+      delete:
+        responses:
+          400:
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            body:
+              application/json:
+                schema: errorsObject
+          200:
+  - collectionGetNo206NoPaginable:
+      description: "Tip de recurso para colecciones solo con get"
+      get:
+        description: "Obtiene el recurso <<resourcePathName>>"
+        responses:
+          200:
+            description: "El recurso <<resourcePathName>> se recupero correctamente"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          403:
+            description: "El acceso al recurso <<resourcePathName>> no está permitido"
+            body:
+              application/json:
+                schema: errorsObject
+  - documentPut:
+      description: "Recurso  <<resourcePathName|!singularize>>"
+      put:
+        description: "Actualiza el recurso <<resourcePathName|!singularize>>"
+        body:
+          application/json:
+            schema: errorsObject
+        responses:
+          400:
+            description: "La solicitud del recurso <<resourcePathName>> contiene algún error sintáctico."
+            body:
+              application/json:
+                schema: errorsObject
+          403:
+            description: "Método no permitido para el recurso <<resourcePathName|!singularize>>"
+            body:
+              application/json:
+                schema: errorsObject
+          404:
+            description: "El recurso <<resourcePathName>> no se ha encontrado."
+            body:
+              application/json:
+                schema: errorsObject
+          409:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          422:
+            description: "El recurso <<resourcePathName|!singularize>> no ha sido actualizado en la colección debido a un error en logica de negocio"
+            body:
+              application/json:
+                schema: errorsObject
+          428:
+            description: "Error de concurrencia. La petición sobre el recurso <<resourcePathName|!singularize>> no ha sido satisfecha"
+            body:
+              application/json:
+                schema: errorsObject
+          401:
+            description: "El cliente no está autenticado"
+          200?:
+            description: "El recurso <<resourcePathName|!singularize>> ha sido actualizado satisfactoriamente"
+            body:
+              application/json:
+                schema: errorsObject
+          202?:
+            description: "La petición de actualización de recurso <<resourcePathName|!singularize>> ha sido aceptada"
+/seguros/paso/vidaModular/progresionesEconomicas:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      identificadorDeOportunidad:
+        type: integer
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: progresionEconomicaResponseCollection
+            example: |
+              {
+                "data": [
+                    {
+                      "type": "progresionEconomicaResponse",
+                      "id": "1819b5f3-8bfb-4ac8-9eb0-74fcee51799d",
+                      "attributes":   {
+                          "identificadorDeOportunidad": 358,
+                          "anho": 690,
+                          "ingresosConyuge":   {
+                              "cantidad": 1000.34,
+                              "divisa": "CHF"
+                            }
+                          ,
+                          "ingresosViudedad":   {
+                              "cantidad": 345.45,
+                              "divisa": "USD"
+                            }
+                          ,
+                          "ingresosOrfandad":   {
+                              "cantidad": 2987.98,
+                              "divisa": "USD"
+                            }
+                          ,
+                          "ingresosOrfandadComplemento":   {
+                              "cantidad": 12456.32,
+                              "divisa": "GBP"
+                            }
+                          ,
+                          "ingresosInvalidez":   {
+                              "cantidad": 12434.02,
+                              "divisa": "CHF"
+                            }
+                          ,
+                          "ingresosActuales":   {
+                              "cantidad": 1234.45,
+                              "divisa": "EUR"
+                            }
+                          ,
+                          "perdidaDeIngresos":   {
+                              "cantidad": 1234.45,
+                              "divisa": "USD"
+                            }
+                          ,
+                          "capitalNecesario":   {
+                              "cantidad": 1000.34,
+                              "divisa": "GBP"
+                            }
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/9e85642f-8531-48f2-814e-478f54323eae"
+                        }
+                    }
+                  ,
+                    {
+                      "type": "progresionEconomicaResponse",
+                      "id": "d55c000d-90b0-46c3-a699-692243003697",
+                      "attributes":   {
+                          "identificadorDeOportunidad": 854,
+                          "anho": 830,
+                          "ingresosConyuge":   {
+                              "cantidad": 12456.32,
+                              "divisa": "CAD"
+                            }
+                          ,
+                          "ingresosViudedad":   {
+                              "cantidad": 567.21,
+                              "divisa": "EUR"
+                            }
+                          ,
+                          "ingresosOrfandad":   {
+                              "cantidad": 12456.32,
+                              "divisa": "GBP"
+                            }
+                          ,
+                          "ingresosOrfandadComplemento":   {
+                              "cantidad": 12434.02,
+                              "divisa": "CHF"
+                            }
+                          ,
+                          "ingresosInvalidez":   {
+                              "cantidad": 12456.32,
+                              "divisa": "CAD"
+                            }
+                          ,
+                          "ingresosActuales":   {
+                              "cantidad": 2987.98,
+                              "divisa": "AUD"
+                            }
+                          ,
+                          "perdidaDeIngresos":   {
+                              "cantidad": 45000.98,
+                              "divisa": "AUD"
+                            }
+                          ,
+                          "capitalNecesario":   {
+                              "cantidad": 567.21,
+                              "divisa": "USD"
+                            }
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/d55c000d-90b0-46c3-a699-692243003697"
+                        }
+                    }
+                  
+                ],
+                "links":   {
+                    "self": "/recursos/3d9aed70-d476-4b9b-a3a4-02cbcff759b3",
+                    "first": "/colecciones?pageNumber=1&pageSize=20",
+                    "next": "/colecciones?pageNumber=5&pageSize=20",
+                    "prev": "/colecciones?pageNumber=3&pageSize=20",
+                    "last": "/colecciones?pageNumber=6&pageSize=20"
+                  }
+              }
+/seguros/paso/vidaModular/situacionActualDelEstudio:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      identificadorDeOportunidad:
+        type: integer
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: situacionActualDelEstudioResponse
+            example: |
+              {
+                "data":   {
+                    "type": "situacionActualDelEstudioResponse",
+                    "id": "3d9aed70-d476-4b9b-a3a4-02cbcff759b3",
+                    "attributes":   {
+                        "codigoDePoliza": "Ptdlr",
+                        "codigoDeSituacion": "Puwn"
+                      }
+                    ,
+                    "links":   {
+                        "self": "/recursos/36d2c004-55d1-44e3-b35d-0bfc1d4684b7"
+                      }
+                  }
+                ,
+                "links":   {
+                    "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                  }
+              }
+/seguros/paso/vidaModular/tiposDeDeportes:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      versionHeredada:
+        type: boolean
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeDeporteResponseCollection
+            example: |
+              {
+                "data": [
+                    {
+                      "type": "tipoDeDeporteResponse",
+                      "id": "42c9e83b-476d-400d-b054-99cb12e653ec",
+                      "attributes":   {
+                          "codigoDeDeporte": "Nqqxp",
+                          "descripcionDeDeporte": "Vstamlii",
+                          "tipoDeDeporte": "Mshfj"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                        }
+                    }
+                  ,
+                    {
+                      "type": "tipoDeDeporteResponse",
+                      "id": "36d2c004-55d1-44e3-b35d-0bfc1d4684b7",
+                      "attributes":   {
+                          "codigoDeDeporte": "Ajtyyt",
+                          "descripcionDeDeporte": "Ugdvoyr",
+                          "tipoDeDeporte": "Ljsbjkf"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                        }
+                    }
+                  
+                ],
+                "links":   {
+                    "self": "/recursos/36d2c004-55d1-44e3-b35d-0bfc1d4684b7",
+                    "first": "/colecciones?pageNumber=1&pageSize=20",
+                    "next": "/colecciones?pageNumber=5&pageSize=20",
+                    "prev": "/colecciones?pageNumber=3&pageSize=20",
+                    "last": "/colecciones?pageNumber=6&pageSize=20"
+                  }
+              }
+/seguros/paso/vidaModular/tiposDeDeportes/{tipoDeDeporteId}:
+  type: collectionGetNoPaginable
+  uriParameters:
+    tipoDeDeporteId:
+      type: string
+  get:
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeDeporteResponse
+            example: |
+              {
+                "data":   {
+                    "type": "tipoDeDeporteResponse",
+                    "id": "20d2ee3b-f2b9-4069-adef-3f534c571a64",
+                    "attributes":   {
+                        "codigoDeDeporte": "Fpje",
+                        "descripcionDeDeporte": "Nvxwxcf",
+                        "tipoDeDeporte": "Imsfu"
+                      }
+                    ,
+                    "links":   {
+                        "self": "/recursos/3d9aed70-d476-4b9b-a3a4-02cbcff759b3"
+                      }
+                  }
+                ,
+                "links":   {
+                    "self": "/recursos/f53148b8-9b94-4c67-b551-9d89d6468dd7"
+                  }
+              }
+/seguros/paso/vidaModular/tiposDeProfesiones:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      versionHeredada:
+        type: boolean
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeProfesionResponseCollection
+            example: |
+              {
+                "data": [
+                    {
+                      "type": "tipoDeProfesionResponse",
+                      "id": "42c9e83b-476d-400d-b054-99cb12e653ec",
+                      "attributes":   {
+                          "codigoDeProfesion": "02",
+                          "descripcionDeProfesion": "Buvmnht",
+                          "tipoDeProfesion": "Kgwf"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/36d2c004-55d1-44e3-b35d-0bfc1d4684b7"
+                        }
+                    }
+                  ,
+                    {
+                      "type": "tipoDeProfesionResponse",
+                      "id": "46126281-ea14-42f3-ae5c-89faebb5b783",
+                      "attributes":   {
+                          "codigoDeProfesion": "01",
+                          "descripcionDeProfesion": "Olvc",
+                          "tipoDeProfesion": "Eyfss"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/9e85642f-8531-48f2-814e-478f54323eae"
+                        }
+                    }
+                  
+                ],
+                "links":   {
+                    "self": "/recursos/36d2c004-55d1-44e3-b35d-0bfc1d4684b7",
+                    "first": "/colecciones?pageNumber=1&pageSize=20",
+                    "next": "/colecciones?pageNumber=5&pageSize=20",
+                    "prev": "/colecciones?pageNumber=3&pageSize=20",
+                    "last": "/colecciones?pageNumber=6&pageSize=20"
+                  }
+              }
+/seguros/paso/vidaModular/tiposDeProfesiones/{tipoDeProfesionId}:
+  type: collectionGetNoPaginable
+  uriParameters:
+    tipoDeProfesionId:
+      type: string
+  get:
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeProfesionResponse
+            example: |
+              {
+                "data":   {
+                    "type": "tipoDeProfesionResponse",
+                    "id": "3d9aed70-d476-4b9b-a3a4-02cbcff759b3",
+                    "attributes":   {
+                        "codigoDeProfesion": "02",
+                        "descripcionDeProfesion": "Urik",
+                        "tipoDeProfesion": "Eatykh"
+                      }
+                    ,
+                    "links":   {
+                        "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                      }
+                  }
+                ,
+                "links":   {
+                    "self": "/recursos/9e85642f-8531-48f2-814e-478f54323eae"
+                  }
+              }
+/seguros/paso/vidaModular/simulaciones:
+  type: collectionPost
+  post:
+    body:
+      application/json:
+        schema: simulacionRequest
+        example: |
+          {
+            "data":   {
+                "type": "simulacionRequest",
+                "attributes":   {
+                    "identificadorDeOportunidad": 761,
+                    "codigoDePersonaIone": "Gjtknvup",
+                    "codigoDeDeporte": "Tunowbh",
+                    "codigoDeProfesion": "01",
+                    "coberturas": [
+                        {
+                          "codigo": "CODE",
+                          "capital": 21424.5953920412
+                        }
+                      ,
+                        {
+                          "codigo": "CODE",
+                          "capital": 26164.4955380654
+                        }
+                      
+                    ],
+                    "recargoElastico": 4496.64711137146,
+                    "recargoTecnico": 26615.2890513722,
+                    "numeroDeRenovaciones": 94239.6476586534
+                  }
+              }
+          }
+    responses:
+      201:
+        description: "El recurso simulaciones ha sido creado satisfactoriamente"
+        body:
+          application/json:
+            schema: simulacionResponse
+            example: |
+              {
+                "data":   {
+                    "type": "simulacionResponseData",
+                    "attributes":   {
+                        "primaTarTotal": 25547.0150432303,
+                        "primaTarAnho1": 39114.2986231084,
+                        "primaTarAnho2": 3726.62192151259,
+                        "primaTarAnho3": 79092.1887280849,
+                        "primaTarAnho4": 46579.9494379107,
+                        "primaTarAnho5": 20319.0137507948,
+                        "primaPu": 4213.28791427114
+                      }
+                  }
+              }
+/seguros/paso/vidaModular/horariosDeReconocimientosMedico:
+  type: collectionPost
+  post:
+    body:
+      application/json:
+        schema: horariosDeReconocimientosMedicoRequest
+        example: |
+          {
+            "data":   {
+                "type": "horariosDeReconocimientosMedicoRequest",
+                "attributes":   {
+                    "nuc": 663,
+                    "horario": "Uuqaf"
+                  }
+              }
+          }
+    responses:
+      204:
+        description: "El recurso de horarios se ha creado satisfactoriamente"
+/seguros/paso/vidaModular/capitales:
+  type: collectionPost
+  post:
+    body:
+      application/json:
+        schema: capitalPostRequest
+        example: |
+          {
+            "data":   {
+                "type": "capitalPostRequest",
+                "attributes":   {
+                    "identificadorDeOportunidad": "Qiktxxyt"
+                  }
+              }
+          }
+    responses:
+      204:
+        description: "El recurso de horarios se ha creado satisfactoriamente"
+/me/seguros/paso/vidaModular/progresionesEconomicas:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      identificadorDeOportunidad:
+        type: string
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: progresionEconomicaResponseCollection
+            example: |
+              {
+                "data": [
+                    {
+                      "type": "progresionEconomicaResponse",
+                      "id": "3d9aed70-d476-4b9b-a3a4-02cbcff759b3",
+                      "attributes":   {
+                          "identificadorDeOportunidad": 568,
+                          "anho": 622,
+                          "ingresosConyuge":   {
+                              "cantidad": 1234.45,
+                              "divisa": "USD"
+                            }
+                          ,
+                          "ingresosViudedad":   {
+                              "cantidad": 12456.32,
+                              "divisa": "AUD"
+                            }
+                          ,
+                          "ingresosOrfandad":   {
+                              "cantidad": 12434.02,
+                              "divisa": "EUR"
+                            }
+                          ,
+                          "ingresosOrfandadComplemento":   {
+                              "cantidad": 50000.65,
+                              "divisa": "AUD"
+                            }
+                          ,
+                          "ingresosInvalidez":   {
+                              "cantidad": 1234.45,
+                              "divisa": "USD"
+                            }
+                          ,
+                          "ingresosActuales":   {
+                              "cantidad": 12456.32,
+                              "divisa": "AUD"
+                            }
+                          ,
+                          "perdidaDeIngresos":   {
+                              "cantidad": 12456.32,
+                              "divisa": "USD"
+                            }
+                          ,
+                          "capitalNecesario":   {
+                              "cantidad": 567.21,
+                              "divisa": "GBP"
+                            }
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/9e85642f-8531-48f2-814e-478f54323eae"
+                        }
+                    }
+                  ,
+                    {
+                      "type": "progresionEconomicaResponse",
+                      "id": "1819b5f3-8bfb-4ac8-9eb0-74fcee51799d",
+                      "attributes":   {
+                          "identificadorDeOportunidad": 829,
+                          "anho": 322,
+                          "ingresosConyuge":   {
+                              "cantidad": 345.45,
+                              "divisa": "CHF"
+                            }
+                          ,
+                          "ingresosViudedad":   {
+                              "cantidad": 1000.34,
+                              "divisa": "AUD"
+                            }
+                          ,
+                          "ingresosOrfandad":   {
+                              "cantidad": 345.45,
+                              "divisa": "GBP"
+                            }
+                          ,
+                          "ingresosOrfandadComplemento":   {
+                              "cantidad": 567.21,
+                              "divisa": "CAD"
+                            }
+                          ,
+                          "ingresosInvalidez":   {
+                              "cantidad": 345.45,
+                              "divisa": "CAD"
+                            }
+                          ,
+                          "ingresosActuales":   {
+                              "cantidad": 50000.65,
+                              "divisa": "CAD"
+                            }
+                          ,
+                          "perdidaDeIngresos":   {
+                              "cantidad": 1234.45,
+                              "divisa": "CAD"
+                            }
+                          ,
+                          "capitalNecesario":   {
+                              "cantidad": 567.21,
+                              "divisa": "GBP"
+                            }
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/d55c000d-90b0-46c3-a699-692243003697"
+                        }
+                    }
+                  
+                ],
+                "links":   {
+                    "self": "/recursos/9e85642f-8531-48f2-814e-478f54323eae",
+                    "first": "/colecciones?pageNumber=1&pageSize=20",
+                    "next": "/colecciones?pageNumber=5&pageSize=20",
+                    "prev": "/colecciones?pageNumber=3&pageSize=20",
+                    "last": "/colecciones?pageNumber=6&pageSize=20"
+                  }
+              }
+/me/seguros/paso/vidaModular/situacionActualDelEstudio:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      identificadorDeOportunidad:
+        type: integer
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: situacionActualDelEstudioResponse
+            example: |
+              {
+                "data":   {
+                    "type": "situacionActualDelEstudioResponse",
+                    "id": "9e85642f-8531-48f2-814e-478f54323eae",
+                    "attributes":   {
+                        "codigoDePoliza": "Hhmhessg",
+                        "codigoDeSituacion": "Gayom"
+                      }
+                    ,
+                    "links":   {
+                        "self": "/recursos/36d2c004-55d1-44e3-b35d-0bfc1d4684b7"
+                      }
+                  }
+                ,
+                "links":   {
+                    "self": "/recursos/d55c000d-90b0-46c3-a699-692243003697"
+                  }
+              }
+/me/seguros/paso/vidaModular/tiposDeDeportes:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      versionHeredada:
+        type: boolean
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeDeporteResponseCollection
+            example: |
+              {
+                "data": [
+                    {
+                      "type": "tipoDeDeporteResponse",
+                      "id": "42c9e83b-476d-400d-b054-99cb12e653ec",
+                      "attributes":   {
+                          "codigoDeDeporte": "Gjxhx",
+                          "descripcionDeDeporte": "Elaq",
+                          "tipoDeDeporte": "Ahmd"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                        }
+                    }
+                  ,
+                    {
+                      "type": "tipoDeDeporteResponse",
+                      "id": "9e85642f-8531-48f2-814e-478f54323eae",
+                      "attributes":   {
+                          "codigoDeDeporte": "Ehvrxel",
+                          "descripcionDeDeporte": "Nridk",
+                          "tipoDeDeporte": "Paaniang"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/f53148b8-9b94-4c67-b551-9d89d6468dd7"
+                        }
+                    }
+                  
+                ],
+                "links":   {
+                    "self": "/recursos/36d2c004-55d1-44e3-b35d-0bfc1d4684b7",
+                    "first": "/colecciones?pageNumber=1&pageSize=20",
+                    "next": "/colecciones?pageNumber=5&pageSize=20",
+                    "prev": "/colecciones?pageNumber=3&pageSize=20",
+                    "last": "/colecciones?pageNumber=6&pageSize=20"
+                  }
+              }
+/me/seguros/paso/vidaModular/tiposDeDeportes/{tipoDeDeporteId}:
+  type: collectionGetNoPaginable
+  uriParameters:
+    tipoDeDeporteId:
+      type: string
+  get:
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeDeporteResponse
+            example: |
+              {
+                "data":   {
+                    "type": "tipoDeDeporteResponse",
+                    "id": "1819b5f3-8bfb-4ac8-9eb0-74fcee51799d",
+                    "attributes":   {
+                        "codigoDeDeporte": "Lvbxlj",
+                        "descripcionDeDeporte": "Oltvnm",
+                        "tipoDeDeporte": "Dvgejg"
+                      }
+                    ,
+                    "links":   {
+                        "self": "/recursos/9e85642f-8531-48f2-814e-478f54323eae"
+                      }
+                  }
+                ,
+                "links":   {
+                    "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                  }
+              }
+/me/seguros/paso/vidaModular/tiposDeProfesiones:
+  type: collectionGetNoPaginable
+  get:
+    queryParameters:
+      versionHeredada:
+        type: boolean
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeProfesionResponseCollection
+            example: |
+              {
+                "data": [
+                    {
+                      "type": "tipoDeProfesionResponse",
+                      "id": "9e85642f-8531-48f2-814e-478f54323eae",
+                      "attributes":   {
+                          "codigoDeProfesion": "01",
+                          "descripcionDeProfesion": "Hoyiceqb",
+                          "tipoDeProfesion": "Lclnf"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                        }
+                    }
+                  ,
+                    {
+                      "type": "tipoDeProfesionResponse",
+                      "id": "d55c000d-90b0-46c3-a699-692243003697",
+                      "attributes":   {
+                          "codigoDeProfesion": "01",
+                          "descripcionDeProfesion": "Eatndv",
+                          "tipoDeProfesion": "Wvlyv"
+                        }
+                      ,
+                      "links":   {
+                          "self": "/recursos/20d2ee3b-f2b9-4069-adef-3f534c571a64"
+                        }
+                    }
+                  
+                ],
+                "links":   {
+                    "self": "/recursos/d55c000d-90b0-46c3-a699-692243003697",
+                    "first": "/colecciones?pageNumber=1&pageSize=20",
+                    "next": "/colecciones?pageNumber=5&pageSize=20",
+                    "prev": "/colecciones?pageNumber=3&pageSize=20",
+                    "last": "/colecciones?pageNumber=6&pageSize=20"
+                  }
+              }
+/me/seguros/paso/vidaModular/tiposDeProfesiones/{tipoDeProfesionId}:
+  type: collectionGetNoPaginable
+  uriParameters:
+    tipoDeProfesionId:
+      type: string
+  get:
+    responses:
+      200:
+        description: "El recurso se ha recuperado correctamente."
+        body:
+          application/json:
+            schema: tipoDeProfesionResponse
+            example: |
+              {
+                "data":   {
+                    "type": "tipoDeProfesionResponse",
+                    "id": "3d9aed70-d476-4b9b-a3a4-02cbcff759b3",
+                    "attributes":   {
+                        "codigoDeProfesion": "03",
+                        "descripcionDeProfesion": "Gykrbdl",
+                        "tipoDeProfesion": "Cgqkdhkf"
+                      }
+                    ,
+                    "links":   {
+                        "self": "/recursos/f53148b8-9b94-4c67-b551-9d89d6468dd7"
+                      }
+                  }
+                ,
+                "links":   {
+                    "self": "/recursos/36d2c004-55d1-44e3-b35d-0bfc1d4684b7"
+                  }
+              }
+/me/seguros/paso/vidaModular/simulaciones:
+  type: collectionPost
+  post:
+    body:
+      application/json:
+        schema: simulacionRequest
+        example: |
+          {
+            "data":   {
+                "type": "simulacionRequest",
+                "attributes":   {
+                    "identificadorDeOportunidad": 772,
+                    "codigoDePersonaIone": "Iwspjiim",
+                    "codigoDeDeporte": "Lhpj",
+                    "codigoDeProfesion": "03",
+                    "coberturas": [
+                        {
+                          "codigo": "CODE",
+                          "capital": 11058.6453681153
+                        }
+                      ,
+                        {
+                          "codigo": "CODE",
+                          "capital": 3006.13555638405
+                        }
+                      
+                    ],
+                    "recargoElastico": 90018.7014890922,
+                    "recargoTecnico": 19906.3253625791,
+                    "numeroDeRenovaciones": 53449.5243432231
+                  }
+              }
+          }
+    responses:
+      201:
+        description: "El recurso simulaciones ha sido creado satisfactoriamente"
+        body:
+          application/json:
+            schema: simulacionResponse
+            example: |
+              {
+                "data":   {
+                    "type": "simulacionResponseData",
+                    "attributes":   {
+                        "primaTarTotal": 81313.7233710446,
+                        "primaTarAnho1": 57488.597253565,
+                        "primaTarAnho2": 97681.6284669012,
+                        "primaTarAnho3": 83489.8561069229,
+                        "primaTarAnho4": 45170.853936193,
+                        "primaTarAnho5": 5719.176234081,
+                        "primaPu": 2193.16888749281
+                      }
+                  }
+              }
+/me/seguros/paso/vidaModular/horariosDeReconocimientosMedico:
+  type: collectionPost
+  post:
+    body:
+      application/json:
+        schema: horariosDeReconocimientosMedicoRequest
+        example: |
+          {
+            "data":   {
+                "type": "horariosDeReconocimientosMedicoRequest",
+                "attributes":   {
+                    "nuc": 958,
+                    "horario": "Ldbyocp"
+                  }
+              }
+          }
+    responses:
+      204:
+        description: "El recurso de horarios se ha creado satisfactoriamente"
+documentation:
+  - title: "Informacion sobre este documento"
+    content: |
+      El fichero original a partir del cual se ha generado este documento está accesible aquí: **[cag.bg.segurospaso.vendors.vidamodular.raml](http://dcaplicaciones/mrph102/trackUrl.aspx?name=cag.bg.segurospaso.vendors.vidamodular&link=http%3a%2f%2fdcaplicaciones%2fmrph103%2fcontenido%2framl%2fCGDN%2fcag.bg.segurospaso.vendors.vidamodular.raml)**.
+      Si desea obtener un RAML autocontenido (incluye todos los recursos en el propio RAML, no contiene referencias externas), haga click aquí: [cag.bg.segurospaso.vendors.vidamodular-full.raml](http://dcaplicaciones/mrph102/trackUrl.aspx?name=cag.bg.segurospaso.vendors.vidamodular&link=http%3a%2f%2fdcaplicaciones%2fmrph102%2framlGetFull.aspx%3fname%3dcag.bg.segurospaso.vendors.vidamodular).
+      Este documento se ha generado con fecha '05-08-2025 8:01:40', y ha sido publicado por 'Vila Fonseca, Sergio (V368920)'.
+      
+      También está disponible la versión **Swagger** de este documento (generado automáticamente desde el RAML) en este enlace: [cag.bg.segurospaso.vendors.vidamodular.json](http://dcaplicaciones/mrph102/trackUrl.aspx?name=cag.bg.segurospaso.vendors.vidamodular&link=http%3a%2f%2fdcnodejsxxs1%3a1340%2fswagger%3furl%3dhttp%3a%2f%2fdcaplicaciones%2fmrph103%2fcontenido%2framl%2fCGDN%2fcag.bg.segurospaso.vendors.vidamodular.raml).
+      
+      
+  - title: "Suscripcion"
+    content: |
+      Si lo desea, puede **suscribirse a este documento**, es decir, recibirá una alerta cada vez que este documento sufra cambios. Esta suscripción se inicará de forma automática si usted descarga algun archivo relacionado con este documento. Si solo desea hacer seguimiento para que se le notifiquen los cambios haga click aquí: [subscribe](http://dcaplicaciones/mrph102/subscribe.aspx?name=cag.bg.segurospaso.vendors.vidamodular).
+      
+      Si ya esta suscrito y desea **cancelar la suscripción** haga click aquí: [unsubscribe](http://dcaplicaciones/mrph102/unsubscribe.aspx?name=cag.bg.segurospaso.vendors.vidamodular).
+      
+  - title: "Stubs para desarrolladores"
+    content: |
+      ![caraml RENDER](caramlRender.png)
+      
+      Si lo desea, puede bajarse directamente desde aquí un zip con los controladores y los modelos para diferentes lenguajes. **Adicionalmente, en [este enlace](/mrph102/stubDownload.aspx?pname=cag.bg.segurospaso.vendors.vidamodular) podrá customizar su descarga para que se adapte más fácilmente a sus proyectos**.
+      * [WebAPI (C#)](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=WebAPI "Stub para aplicaciones REST/C# en servidor de 'cag.bg.segurospaso.vendors.vidamodular'")
+      * [WebAPI (C#) Async](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=WebApiAsync "Stub para aplicaciones REST/C# (con interface asincrono) en servidor de 'cag.bg.segurospaso.vendors.vidamodular'")
+      * [CTypeScript](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=CTypeScript "Stub cliente de 'cag.bg.segurospaso.vendors.vidamodular' en TypeScript con clases")
+      * [ITypeScript](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=ITypeScript "Stub cliente de 'cag.bg.segurospaso.vendors.vidamodular' en TypeScript con interfaces")
+      * [JsonApi5](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=JsonApi5 "Stub cliente de 'cag.bg.segurospaso.vendors.vidamodular' en TypeScript para Angular 5")
+      * [JsonApi6 (modelos y controladores)](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=JsonApi6 "Stub cliente de 'cag.bg.segurospaso.vendors.vidamodular' en TypeScript para Angular 6 (modelos y controladores)")
+      * [Cliente C# de WebAPI](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=WebApiClient "Stub cliente de 'cag.bg.segurospaso.vendors.vidamodular' en C#")
+      * [Cliente C# para Xamarin Android](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=XamarinAndroid "Stub cliente de 'cag.bg.segurospaso.vendors.vidamodular' en C# para Xamarin")
+      * [Cliente para PL/I CICS(R)](/mrph102/ramlRender.aspx?raml=cag.bg.segurospaso.vendors.vidamodular&ns=application1&cell=PliClient "Stub cliente de 'cag.bg.segurospaso.vendors.vidamodular' en PL/I para CICS(R)")
+      
+  - title: "Pruebas de la API"
+    content: |
+      Se deseas probar este API de forma sencilla, sin tener que desarrollar ninguna aplicación cliente, en este enlace puedes explorar la API y probar los recursos publicados. También puedes incorporar datos (incluso en formato JSON) a la entrada de los métodos (por ejemplo, escribir un JSON para pasárselo a un POST).
+      El enlace está disponible aquí: [swagger-ui](/mrph102/dist?url=http%3a%2f%2fdcnodejsxxs1%3a1340%2fswagger%3furl%3dhttp%3a%2f%2fdcaplicaciones%2fmrph103%2fcontenido%2framl%2fCGDN%2fcag.bg.segurospaso.vendors.vidamodular.raml "Title").
+      
+      Si lo que quieres es probar las llamadas desde una aplicación, en el servidor de mocks corporativo se han creado los mocks correspondientes a esta API, y están accesible aquí: [http://dcaplicaciones/mrph106/mocker/cag.bg.segurospaso.vendors.vidamodular](http://dcaplicaciones/mrph106/mocker/cag.bg.segurospaso.vendors.vidamodular "Title").
+      
+      Si necesitas ejemplos para cargar en alguna aplicacion, en el PostMan, o donde sea, [EN ESTE ENLACE](/mrph102/schemaSampler.aspx?pname=cag.bg.segurospaso.vendors.vidamodular) puedes generar ejemplos JSON aleatoriamente.
+      
+      
