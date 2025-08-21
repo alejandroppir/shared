@@ -1,0 +1,2445 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Funcional - Automatización de GitLab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --color-primary: #5c88da;
+        --color-primary-dark: #4a75c3;
+        --color-error: #ef3340;
+        --color-accent: #00b388;
+        --color-accent-dark: #009a73;
+        --color-warning: #fcc317;
+        --color-text-main: #222222;
+        --color-text-main-hover: #222222;
+        --color-text-secondary: #666666;
+        --color-disabled: #cccccc;
+        --color-border: #eeeeee;
+        --color-background: #f7f7f7;
+        --color-background-hover: #f7f7f7;
+        --color-white: #ffffff;
+        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --border-radius: 8px;
+      }
+
+      body[data-theme='dark'] {
+        --color-primary: #79a0e6;
+        --color-primary-dark: #5c88da;
+        --color-error: #ff5252;
+        --color-accent: #26a69a;
+        --color-accent-dark: #00897b;
+        --color-warning: #ffca28;
+        --color-text-main: #e0e0e0;
+        --color-text-main-hover: #222222;
+        --color-text-secondary: #9e9e9e;
+        --color-disabled: #616161;
+        --color-border: #424242;
+        --color-background: #121212;
+        --color-background-hover: #f7f7f7;
+        --color-white: #1e1e1e;
+        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: var(--color-background);
+        color: var(--color-text-main);
+        display: flex;
+        font-size: 16px;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .app-container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+      .sidebar {
+        width: 260px;
+        background-color: var(--color-white);
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--color-border);
+        transition: background-color 0.3s, border-color 0.3s;
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 32px;
+        padding: 0 8px;
+      }
+      .sidebar-header .logo-icon {
+        font-size: 32px;
+        color: var(--color-primary);
+      }
+      .sidebar-header .logo-text {
+        font-size: 18px;
+        font-weight: 700;
+        margin-left: 12px;
+        color: var(--color-primary);
+      }
+      .nav-menu {
+        list-style: none;
+        flex-grow: 1;
+      }
+      .nav-item a {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: var(--color-text-secondary);
+        font-weight: 500;
+        border-radius: var(--border-radius);
+        margin-bottom: 8px;
+        transition: background-color 0.2s, color 0.2s;
+      }
+      .nav-item a .nav-text-container {
+        display: flex;
+        flex-direction: column;
+      }
+      .nav-subtitle {
+        font-size: 11px;
+        font-weight: 400;
+        opacity: 0.7;
+        margin-top: 2px;
+      }
+      .nav-item a:hover:not(.disabled) {
+        background-color: var(--color-background-hover);
+        color: var(--color-text-main-hover);
+      }
+      .nav-item a.active {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+        box-shadow: var(--shadow-sm);
+      }
+      body[data-theme='dark'] .nav-item a.active {
+        color: #121212;
+      }
+      .nav-item a.disabled {
+        color: var(--color-disabled);
+        cursor: not-allowed;
+        background-color: transparent;
+      }
+      .nav-item a .material-icons {
+        margin-right: 16px;
+      }
+      .sidebar-footer {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid var(--color-border);
+      }
+      .theme-switcher {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .theme-switcher-label {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: var(--color-background);
+        border-radius: 50px;
+        padding: 4px;
+        position: relative;
+        width: 70px;
+        height: 34px;
+      }
+      .theme-switcher-label .material-icons {
+        font-size: 20px;
+        color: var(--color-text-secondary);
+        transition: color 0.3s;
+      }
+      .theme-switcher-label .ball {
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        background-color: var(--color-white);
+        border-radius: 50%;
+        left: 4px;
+        transition: transform 0.3s ease;
+        box-shadow: var(--shadow-sm);
+      }
+      .theme-switcher-checkbox {
+        display: none;
+      }
+      .theme-switcher-checkbox:checked + .theme-switcher-label .ball {
+        transform: translateX(36px);
+      }
+      .connection-status {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+        padding: 0 8px;
+      }
+      .connection-status .material-icons {
+        margin-right: 12px;
+        transition: color 0.3s;
+      }
+      .connection-status .status-connected {
+        color: var(--color-accent);
+      }
+      .connection-status .status-disconnected {
+        color: var(--color-error);
+      }
+      .connection-status .status-unknown {
+        color: var(--color-text-secondary);
+      }
+      .main-content {
+        flex-grow: 1;
+        padding: 32px;
+        overflow-y: auto;
+      }
+      .view {
+        display: none;
+      }
+      .view.active {
+        display: block;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+      h2 {
+        font-size: 24px;
+        font-weight: 500;
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 8px;
+        margin-top: 24px;
+        margin-bottom: 16px;
+      }
+      .card {
+        background-color: var(--color-white);
+        border-radius: var(--border-radius);
+        padding: 24px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 24px;
+        transition: background-color 0.3s;
+      }
+      .form-group {
+        margin-bottom: 24px;
+      }
+      .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--color-text-secondary);
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius);
+        font-size: 16px;
+        transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
+        background-color: var(--color-white);
+        color: var(--color-text-main);
+      }
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(92, 136, 218, 0.2);
+      }
+      .form-group input[readonly] {
+        background-color: var(--color-background);
+        cursor: not-allowed;
+      }
+      .form-group .input-with-icon {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .form-group .input-with-icon select {
+        flex-grow: 1;
+      }
+      .form-group .input-with-icon a {
+        color: var(--color-text-secondary);
+        text-decoration: none;
+      }
+      .form-group .input-with-icon a.disabled {
+        color: var(--color-disabled);
+        pointer-events: none;
+      }
+      .button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s, box-shadow 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .button:disabled {
+        background-color: var(--color-disabled);
+        cursor: not-allowed;
+      }
+      .button .material-icons {
+        margin-right: 8px;
+      }
+      .button-primary {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+      }
+      body[data-theme='dark'] .button-primary {
+        color: #121212;
+      }
+      .button-primary:hover:not(:disabled) {
+        background-color: var(--color-primary-dark);
+        box-shadow: var(--shadow-sm);
+      }
+      .button-group {
+        display: flex;
+        gap: 16px;
+        margin-top: 24px;
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 16px 24px;
+        border-radius: var(--border-radius);
+        color: var(--color-white);
+        box-shadow: var(--shadow-md);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.5s, transform 0.5s;
+        display: flex;
+        align-items: center;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px);
+      }
+      .toast-success {
+        background-color: var(--color-accent);
+      }
+      .toast-error {
+        background-color: var(--color-error);
+      }
+      .toast-warning {
+        background-color: var(--color-warning);
+        color: var(--color-text-main);
+      }
+      .toast .material-icons {
+        margin-right: 12px;
+      }
+      .multiselect-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius);
+        max-height: 150px;
+        overflow-y: auto;
+      }
+      .multiselect-item input[type='checkbox'] {
+        display: none;
+      }
+      .multiselect-item label {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 20px;
+        background-color: var(--color-background);
+        color: var(--color-text-secondary);
+        transition: background-color 0.2s, color 0.2s;
+        font-weight: 400;
+        margin-bottom: 0;
+        cursor: pointer;
+      }
+      .multiselect-item label .material-icons {
+        font-size: 16px;
+        margin-right: 6px;
+      }
+      .multiselect-item input[type='checkbox']:checked + label {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+      }
+      body[data-theme='dark'] .multiselect-item input[type='checkbox']:checked + label {
+        color: #121212;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+      }
+      th {
+        font-weight: 500;
+        background-color: var(--color-background);
+        color: var(--color-text-secondary);
+      }
+      th.sortable {
+        cursor: pointer;
+        user-select: none;
+      }
+      th.sortable:hover {
+        background-color: #e8e8e8;
+      }
+      body[data-theme='dark'] th.sortable:hover {
+        background-color: #333;
+      }
+      th .sort-icon {
+        font-size: 16px;
+        vertical-align: middle;
+        margin-left: 4px;
+        opacity: 0.6;
+      }
+      td a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      td a:hover {
+        text-decoration: underline;
+      }
+      td .material-icons {
+        vertical-align: middle;
+      }
+      .loader {
+        text-align: center;
+        padding: 20px;
+        color: var(--color-text-secondary);
+      }
+      .results-container {
+        background-color: #2d2d2d;
+        color: #f1f1f1;
+        padding: 24px;
+        border-radius: var(--border-radius);
+        font-family: monospace;
+        white-space: pre-wrap;
+        margin-top: 24px;
+      }
+      .results-container strong {
+        color: #61afef;
+      }
+      .results-container a {
+        color: #98c379;
+        text-decoration: none;
+      }
+      .list-item {
+        padding: 16px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius);
+        margin-bottom: 16px;
+        background-color: var(--color-white);
+      }
+      .list-item .error-list {
+        color: var(--color-error);
+        margin-left: 20px;
+      }
+      .list-item a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .list-item a:hover {
+        text-decoration: underline;
+      }
+      .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        align-items: end;
+      }
+      .persistent-warning {
+        padding: 16px;
+        border-radius: var(--border-radius);
+        margin-bottom: 16px;
+        background-color: var(--color-warning);
+        color: var(--color-text-main);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <i class="material-icons logo-icon">dashboard</i>
+          <span class="logo-text">GitLab Automation</span>
+        </div>
+        <ul id="nav-menu" class="nav-menu">
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-view="config"><i class="material-icons">settings</i><span class="nav-text">Configuración</span></a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="epics"><i class="material-icons">view_week</i><span class="nav-text">Epics</span></a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="issues"><i class="material-icons">list_alt</i><span class="nav-text">Issues</span></a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="iterations">
+              <i class="material-icons">event_repeat</i>
+              <div class="nav-text-container">
+                <span class="nav-text">Iteraciones</span>
+                <span class="nav-subtitle">(pendiente de revisar)</span>
+              </div>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="gestionar-milestones"
+              ><i class="material-icons">flag</i><span class="nav-text">Gestionar Milestones</span></a
+            >
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="issues-pase-prod"
+              ><i class="material-icons">outbox</i><span class="nav-text">Issues para Pase</span></a
+            >
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="crear-issue-version">
+              <i class="material-icons">inventory_2</i>
+              <span class="nav-text">Issue de Versión</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="validate-project-issues">
+              <i class="material-icons">rule</i>
+              <div class="nav-text-container">
+                <span class="nav-text">Validar Issues</span>
+                <span class="nav-subtitle">(pendiente de revisar)</span>
+              </div>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link disabled" data-view="gestionar-issues-inventario">
+              <i class="material-icons">inventory</i>
+              <div class="nav-text-container">
+                <span class="nav-text">Gestionar Issues Inventario</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+        <div class="sidebar-footer">
+          <div class="theme-switcher">
+            <input type="checkbox" id="theme-switcher-checkbox" class="theme-switcher-checkbox" />
+            <label for="theme-switcher-checkbox" class="theme-switcher-label">
+              <i class="material-icons">light_mode</i>
+              <i class="material-icons" style="margin-left: auto">dark_mode</i>
+              <span class="ball"></span>
+            </label>
+          </div>
+          <div id="connection-status" class="connection-status">
+            <i id="connection-status-icon" class="material-icons status-unknown">wifi_off</i>
+            <span id="connection-status-text">Desconectado</span>
+          </div>
+        </div>
+      </aside>
+      <main class="main-content">
+        <!-- Vistas de la aplicación -->
+        <div id="view-config" class="view">
+          <h1>Configuración de Conexión a GitLab</h1>
+          <div class="card">
+            <h3>Credenciales de la API</h3>
+            <p>Introduce los datos para conectar con tu instancia de GitLab. El token y el grupo se guardarán en tu navegador.</p>
+            <form id="config-form">
+              <div class="form-group">
+                <label for="gitlab-api-url">URL de la API de GitLab</label>
+                <input type="text" id="gitlab-api-url" value="https://gitlab.abanca.io/api/v4" readonly />
+              </div>
+              <div class="form-group">
+                <label for="gitlab-token">Token de Acceso Personal</label>
+                <input type="password" id="gitlab-token" placeholder="Pega tu token aquí" required />
+              </div>
+              <div class="form-group">
+                <label for="gitlab-group-path-select">Ruta del Grupo GitLab</label>
+                <select id="gitlab-group-path-select">
+                  <option value="ti/7773-inversion-seguros/7699-seguros-it/seguros">ti/7773-inversion-seguros/7699-seguros-it/seguros</option>
+                  <option value="ti/7773-inversion-seguros/7699-seguros-it/grupo-de-empresas">
+                    ti/7773-inversion-seguros/7699-seguros-it/grupo-de-empresas
+                  </option>
+                  <option value="other">Otra</option>
+                </select>
+              </div>
+              <div class="form-group" id="gitlab-group-path-other-container" style="display: none">
+                <label for="gitlab-group-path-other">Especifique la ruta personalizada</label>
+                <input type="text" id="gitlab-group-path-other" placeholder="ej: mi-grupo/mi-subgrupo" />
+              </div>
+              <div class="button-group">
+                <button type="submit" class="button button-primary"><i class="material-icons">save</i>Validar y Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id="view-gestionar-milestones" class="view">
+          <h1>Gestionar Milestones</h1>
+          <div class="card">
+            <div class="filters-grid">
+              <div class="form-group">
+                <label for="milestones-state-filter">Filtrar por Estado</label>
+                <select id="milestones-state-filter">
+                  <option value="opened" selected>Abiertas</option>
+                  <option value="expired">Expiradas</option>
+                  <option value="all">Todas</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <button id="milestones-filter-btn" class="button button-primary"><i class="material-icons">filter_alt</i>Filtrar</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div id="milestones-loader" class="loader" style="display: none">Cargando milestones...</div>
+            <table id="milestones-table" style="display: block">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="milestones-select-all" /></th>
+                  <th>Nombre</th>
+                  <th>Estado</th>
+                  <th>Fecha Inicio</th>
+                  <th>Fecha Fin</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div id="milestones-actions" class="button-group" style="display: none">
+              <button id="milestones-close-btn" class="button button-primary" disabled>
+                <i class="material-icons">close</i>Cerrar Seleccionadas
+              </button>
+              <button id="milestones-create-next-btn" class="button button-primary" disabled>
+                <i class="material-icons">add_circle</i>Crear Siguiente Versión
+              </button>
+            </div>
+          </div>
+          <div id="create-next-milestone-section" class="card" style="display: none">
+            <h2>Crear Nuevas Milestones</h2>
+            <form id="create-next-milestone-form">
+              <div class="form-group">
+                <label for="new-milestone-version">Nueva Versión (ej. 1.232.0)</label>
+                <input type="text" id="new-milestone-version" required pattern="\d+\.\d+\.\d+" />
+              </div>
+              <div class="form-group">
+                <label for="new-milestone-start-date">Fecha de Inicio</label>
+                <input type="date" id="new-milestone-start-date" required />
+              </div>
+              <div class="form-group">
+                <label for="new-milestone-due-date">Fecha de Fin</label>
+                <input type="date" id="new-milestone-due-date" required />
+              </div>
+              <div class="button-group">
+                <button type="submit" class="button button-accent"><i class="material-icons">add_circle_outline</i>Generar y Crear</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id="view-issues-pase-prod" class="view">
+          <h1>Generar Listado de Issues para Pase</h1>
+          <div class="card">
+            <form id="issues-pase-form">
+              <div class="form-group">
+                <label>Selecciona las Divisiones</label>
+                <div id="issues-divisions-multiselect" class="multiselect-container"></div>
+              </div>
+              <div class="form-group">
+                <label>Selecciona los Equipos</label>
+                <div id="issues-teams-multiselect" class="multiselect-container"></div>
+              </div>
+              <div class="button-group">
+                <button type="submit" class="button button-primary"><i class="material-icons">list_alt</i>Generar Listado</button>
+              </div>
+            </form>
+          </div>
+          <div id="issues-pase-results" class="card" style="display: none">
+            <h2>Resultados</h2>
+            <div id="issues-pase-loader" class="loader" style="display: none">Generando listado...</div>
+            <div id="issues-pase-db-warning" class="persistent-warning" style="display: none">
+              <i class="material-icons">storage</i>
+              <span><strong>Atención:</strong> El listado incluye issues que requieren intervención en la Base de Datos.</span>
+            </div>
+            <div id="issues-pase-output" class="results-container"></div>
+            <div class="button-group">
+              <button id="copy-issues-btn" class="button button-secondary"><i class="material-icons">content_copy</i>Copiar al Portapapeles</button>
+            </div>
+          </div>
+        </div>
+        <div id="view-crear-issue-version" class="view">
+          <h1>Clonar Issue de Inventario de Versión</h1>
+          <div class="card">
+            <h2>Última Issue de Inventario Encontrada</h2>
+            <div id="inventory-issue-loader" class="loader">Buscando issue...</div>
+            <div id="latest-inventory-issue-details" style="display: none"></div>
+            <div class="button-group">
+              <button id="clone-issue-btn" class="button button-primary" disabled>
+                <i class="material-icons">control_point_duplicate</i>Clonar e Incrementar Versión
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="view-validate-project-issues" class="view">
+          <h1>Validar Issues de Proyecto para Cierre</h1>
+          <div class="card">
+            <form id="validate-issues-form">
+              <div class="form-group">
+                <label for="validate-project-prefix">Prefijo de Proyecto Externo (ej: PRJ-123)</label>
+                <input type="text" id="validate-project-prefix" placeholder="Opcional" />
+              </div>
+              <div class="form-group">
+                <label for="validate-epic-search">Buscar Épica por Título (solo abiertas)</label>
+                <input type="text" id="validate-epic-search" list="validate-epics-list" placeholder="Escribe para buscar una épica..." />
+                <datalist id="validate-epics-list"></datalist>
+              </div>
+              <div class="form-group">
+                <label for="validate-criteria-filter">Mostrar Issues que</label>
+                <select id="validate-criteria-filter">
+                  <option value="no" selected>No Cumplen Criterios</option>
+                  <option value="yes">Sí Cumplen Criterios</option>
+                  <option value="all">Todas</option>
+                </select>
+              </div>
+              <div class="button-group">
+                <button type="submit" class="button button-primary"><i class="material-icons">task_alt</i>Validar</button>
+              </div>
+            </form>
+          </div>
+          <div id="validate-issues-results" class="card" style="display: none">
+            <h2>Resultados de la Validación</h2>
+            <div id="validate-issues-loader" class="loader" style="display: none">Validando...</div>
+            <div id="validate-issues-output"></div>
+          </div>
+        </div>
+        <div id="view-iterations" class="view">
+          <h1>Análisis de Iteraciones (Últimos 6 meses)</h1>
+          <div class="card">
+            <div class="form-group">
+              <label for="iterations-label-filter">Filtrar por Label de Equipo</label>
+              <select id="iterations-label-filter"></select>
+            </div>
+            <div id="iterations-loader" class="loader">Cargando iteraciones...</div>
+            <div id="iterations-chart-container" style="position: relative; height: 40vh; width: 100%; display: none; margin-bottom: 24px">
+              <canvas id="iterations-chart"></canvas>
+            </div>
+            <table id="iterations-table" style="display: none">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Periodo de la Iteración</th>
+                  <th>Issues Completadas</th>
+                  <th>Peso Completado</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="view-epics" class="view">
+          <h1>Listado de Epics</h1>
+          <div class="card">
+            <div class="filters-grid">
+              <div class="form-group">
+                <label for="epics-title-filter">Filtrar por Título</label>
+                <input type="text" id="epics-title-filter" placeholder="Buscar por título..." />
+              </div>
+              <div class="form-group">
+                <label for="epics-state-filter">Filtrar por Estado</label>
+                <select id="epics-state-filter">
+                  <option value="opened" selected>Abiertas</option>
+                  <option value="closed">Cerradas</option>
+                  <option value="all">Todas</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="epics-label-filter">Filtrar por Label de Equipo</label>
+                <div id="epics-label-filter" class="multiselect-container"></div>
+              </div>
+              <div class="form-group">
+                <button id="epics-filter-btn" class="button button-primary"><i class="material-icons">filter_alt</i>Filtrar</button>
+              </div>
+            </div>
+            <div id="epics-loader" class="loader" style="display: none">Cargando epics...</div>
+            <table id="epics-table" style="display: block">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="iid">ID</th>
+                  <th class="sortable" data-sort-key="team" style="display: none">Equipo</th>
+                  <th class="sortable" data-sort-key="title">Título</th>
+                  <th class="sortable" data-sort-key="state">Estado</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="view-issues" class="view">
+          <h1>Listado de Issues</h1>
+          <div class="card">
+            <div class="filters-grid">
+              <div class="form-group">
+                <label for="issues-title-filter">Filtrar por Título</label>
+                <input type="text" id="issues-title-filter" placeholder="Buscar por título..." />
+              </div>
+              <div class="form-group">
+                <label for="issues-state-filter">Filtrar por Estado</label>
+                <select id="issues-state-filter">
+                  <option value="opened" selected>Abiertas</option>
+                  <option value="closed">Cerradas</option>
+                  <option value="all">Todas</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="issues-label-filter">Filtrar por Label de Equipo</label>
+                <div id="issues-label-filter" class="multiselect-container"></div>
+              </div>
+              <div class="form-group">
+                <label for="issues-division-filter">Filtrar por División</label>
+                <div id="issues-division-filter" class="multiselect-container"></div>
+              </div>
+              <div class="form-group">
+                <label for="issues-epic-filter-input">Filtrar por Épica</label>
+                <input type="text" id="issues-epic-filter-input" list="issues-epic-filter-list" placeholder="Buscar épica..." />
+                <datalist id="issues-epic-filter-list"></datalist>
+              </div>
+              <div class="form-group">
+                <button id="issues-filter-btn" class="button button-primary"><i class="material-icons">filter_alt</i>Filtrar</button>
+              </div>
+            </div>
+            <div id="issues-loader" class="loader" style="display: none">Cargando issues...</div>
+            <table id="issues-table" style="display: block">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort-key="iid">ID</th>
+                  <th class="sortable" data-sort-key="team" style="display: none">Equipo</th>
+                  <th class="sortable" data-sort-key="title">Título</th>
+                  <th class="sortable" data-sort-key="state">Estado</th>
+                  <th class="sortable" data-sort-key="weight">Peso</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="view-gestionar-issues-inventario" class="view">
+          <h1>Gestionar Issues de Inventario</h1>
+          <div class="card">
+            <div class="form-group">
+              <label for="inventory-issue-select">Seleccionar Issue de Inventario de Versión</label>
+              <div class="input-with-icon">
+                <select id="inventory-issue-select">
+                  <option value="">-- Seleccione una issue --</option>
+                </select>
+                <a id="inventory-issue-open-link" href="#" target="_blank" class="disabled" title="Abrir issue de inventario en GitLab">
+                  <i class="material-icons">open_in_new</i>
+                </a>
+              </div>
+              <div id="inventory-select-loader" class="loader" style="display: none">Cargando issues de inventario...</div>
+            </div>
+          </div>
+
+          <div id="inventory-results-container" class="card" style="display: none">
+            <h2>Issues Mencionadas en Comentarios</h2>
+            <div class="filters-grid">
+              <div class="form-group">
+                <label>Filtrar por Equipo</label>
+                <div id="inventory-team-filter" class="multiselect-container"></div>
+              </div>
+              <div class="form-group">
+                <label>Filtrar por División</label>
+                <div id="inventory-division-filter" class="multiselect-container"></div>
+              </div>
+            </div>
+            <div id="inventory-table-loader" class="loader" style="display: none">Cargando issues mencionadas...</div>
+            <table id="inventory-results-table" style="display: none">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="inventory-select-all" /></th>
+                  <th>ID / Título</th>
+                  <th>Sin Desplegar</th>
+                  <th>Milestone</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="button-group">
+              <button id="inventory-move-milestone-btn" class="button button-primary" disabled>
+                <i class="material-icons">flag</i>Mover a Milestone
+              </button>
+              <button id="inventory-remove-label-btn" class="button button-primary" disabled>
+                <i class="material-icons">label_off</i>Marcar como Desplegado
+              </button>
+            </div>
+          </div>
+
+          <div id="inventory-milestone-modal" class="card" style="display: none">
+            <h2>Asignar Milestone</h2>
+            <form id="inventory-milestone-form">
+              <div class="form-group">
+                <label for="inventory-milestone-version-search">Buscar Versión de Milestone (ej: 1.234.0)</label>
+                <input type="text" id="inventory-milestone-version-search" required />
+              </div>
+              <div class="form-group">
+                <label for="inventory-milestone-select">Seleccionar Milestone</label>
+                <select id="inventory-milestone-select" required disabled></select>
+                <div id="inventory-milestone-loader" class="loader" style="display: none">Buscando milestones...</div>
+              </div>
+              <div class="button-group">
+                <button type="submit" class="button button-accent" disabled><i class="material-icons">check</i>Confirmar Asignación</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="toast" class="toast">
+      <i id="toast-icon" class="material-icons"></i>
+      <span id="toast-message"></span>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // =================================================================
+        // MÓDULO: GITLAB API CLIENT (gitlab-api.js)
+        // =================================================================
+        const gitlabClient = {
+          config: {
+            apiUrl: '',
+            token: '',
+            groupId: null,
+            isAuthenticated: false,
+            targetGroupPath: '',
+          },
+
+          async _fetch(endpoint, options = {}) {
+            const url = `${this.config.apiUrl}${endpoint}`;
+            const headers = {
+              'Content-Type': 'application/json',
+              'PRIVATE-TOKEN': this.config.token,
+              ...options.headers,
+            };
+
+            const response = await fetch(url, {...options, headers});
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Error en la API de GitLab (${response.status}): ${errorText}`);
+            }
+            return response.status === 204 ? null : await response.json();
+          },
+
+          async _fetchAllPages(endpoint, params = {}) {
+            let allItems = [];
+            let page = 1;
+            const perPage = 100;
+
+            while (true) {
+              const urlParams = new URLSearchParams();
+              urlParams.set('page', page);
+              urlParams.set('per_page', perPage);
+
+              for (const key in params) {
+                const value = params[key];
+                if (value !== null && value !== undefined && value !== '') {
+                  if (Array.isArray(value) && value.length > 0) {
+                    value.forEach((item) => urlParams.append(`${key}[]`, item));
+                  } else if (!Array.isArray(value)) {
+                    urlParams.set(key, value);
+                  }
+                }
+              }
+
+              const pagedEndpoint = `${endpoint}?${urlParams.toString()}`;
+              const items = await this._fetch(pagedEndpoint);
+              if (!items || items.length === 0) break;
+              allItems = allItems.concat(items);
+              page++;
+            }
+            return allItems;
+          },
+
+          async validateConnection(apiUrl, token) {
+            this.config.apiUrl = apiUrl;
+            this.config.token = token;
+            return this._fetch('/user');
+          },
+
+          async getGroupIdByPath(groupPath) {
+            this.config.targetGroupPath = groupPath;
+            const encodedPath = encodeURIComponent(groupPath);
+            const group = await this._fetch(`/groups/${encodedPath}`);
+            if (group) {
+              this.config.groupId = group.id;
+              return group.id;
+            }
+            throw new Error('No se pudo encontrar el grupo con la ruta especificada.');
+          },
+
+          getMilestones: (params) => gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/milestones`, params),
+          updateMilestone: (groupId, milestoneId, payload) =>
+            gitlabClient._fetch(`/groups/${groupId}/milestones/${milestoneId}`, {method: 'PUT', body: JSON.stringify(payload)}),
+          createMilestone: (groupId, payload) =>
+            gitlabClient._fetch(`/groups/${groupId}/milestones`, {method: 'POST', body: JSON.stringify(payload)}),
+          getLabels: () => gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/labels`),
+          getIssues: (params) => gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/issues`, params),
+          getIssue: (projectId, issueIid) => gitlabClient._fetch(`/projects/${projectId}/issues/${issueIid}`),
+          // NUEVA FUNCIÓN: Obtiene una issue usando la ruta del proyecto en lugar del ID numérico.
+          getIssueByProjectPathAndIid: (projectPath, issueIid) => {
+            const encodedProjectPath = encodeURIComponent(projectPath);
+            return gitlabClient._fetch(`/projects/${encodedProjectPath}/issues/${issueIid}`);
+          },
+          updateIssue: (projectId, issueIid, payload) =>
+            gitlabClient._fetch(`/projects/${projectId}/issues/${issueIid}`, {method: 'PUT', body: JSON.stringify(payload)}),
+          getIssueNotes: (projectId, issueIid) => gitlabClient._fetchAllPages(`/projects/${projectId}/issues/${issueIid}/notes`, {sort: 'asc'}),
+          getProjectDetails: (projectId) => gitlabClient._fetch(`/projects/${projectId}`),
+          getInventoryIssues: () =>
+            gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/issues`, {labels: 'Inventario de versión', state: 'opened'}),
+          cloneIssue: (projectId, payload) => gitlabClient._fetch(`/projects/${projectId}/issues`, {method: 'POST', body: JSON.stringify(payload)}),
+          getEpics: (params) => gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/epics`, params),
+          getEpicIssues: (epicIid) => gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/epics/${epicIid}/issues`),
+          getIterations: () => gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/iterations`, {state: 'all'}),
+          getIterationIssues: (iterationId, label = null) => {
+            const params = {iteration_id: iterationId, state: 'closed'};
+            if (label) params.label_name = [label];
+            return gitlabClient._fetchAllPages(`/groups/${gitlabClient.config.groupId}/issues`, params);
+          },
+        };
+
+        // =================================================================
+        // MÓDULO: HELPERS DE UI Y DATOS (helpers.js)
+        // =================================================================
+        const STORAGE_KEY = 'gitlab-automation';
+        const TEAM_COLORS = {
+          Amarillo: '#fcc317',
+          Rojo: '#ef3340',
+          Azul: '#5c88da',
+          Blanco: '#dddddd',
+          Naranja: '#f7931e',
+          Verde: '#00a651',
+          Verde_old: '#00a651',
+          Negro: '#000000',
+          Violeta: '#9500A6',
+        };
+        const DIVISION_COLORS = {
+          Frontend: '#f7931e', // Naranja
+          Backend: '#00a651', // Verde
+          API: '#666666', // Gris
+          QA: '#009a73', // Verde oscuro
+        };
+        const DIVISION_ICONS = {
+          Frontend: 'palette',
+          Backend: 'storage',
+          API: 'settings_ethernet',
+          QA: 'bug_report',
+        };
+
+        const saveConfigToLocalStorage = (config) => {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        };
+
+        const loadConfigFromLocalStorage = () => {
+          const storedConfig = localStorage.getItem(STORAGE_KEY);
+          return storedConfig ? JSON.parse(storedConfig) : null;
+        };
+
+        const getGroupNameFromPath = (path) => {
+          if (!path) return '';
+          return path.split('/').pop();
+        };
+
+        const getTeamFromLabels = (labels) => {
+          const teamLabel = labels.find((l) => l.startsWith('Equipo::'));
+          return teamLabel ? teamLabel.split('::')[1] : null;
+        };
+
+        const getDivisionFromLabels = (labels) => {
+          const divLabel = labels.find((l) => l.startsWith('División - '));
+          return divLabel ? divLabel.split(' - ')[1] : null;
+        };
+
+        const compareVersions = (v1, v2) => {
+          const parts1 = v1.split('.').map(Number);
+          const parts2 = v2.split('.').map(Number);
+          for (let i = 0; i < parts1.length; i++) {
+            if (parts1[i] > parts2[i]) return 1;
+            if (parts1[i] < parts2[i]) return -1;
+          }
+          return 0;
+        };
+
+        const showToast = (message, type = 'success') => {
+          const toast = document.getElementById('toast');
+          const toastIcon = document.getElementById('toast-icon');
+          const toastMessage = document.getElementById('toast-message');
+          toast.className = 'toast';
+          toastMessage.textContent = message;
+          const typeMap = {success: 'check_circle', error: 'error', warning: 'warning'};
+          toast.classList.add(`toast-${type}`);
+          toastIcon.textContent = typeMap[type];
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 4000);
+        };
+
+        const toggleLoading = (loader, content, isLoading) => {
+          if (loader) loader.style.display = isLoading ? 'block' : 'none';
+          if (content) {
+            content.style.display = isLoading ? 'none' : 'block';
+            if (!isLoading && content.tagName === 'TABLE') {
+              content.style.display = 'table';
+            }
+          }
+        };
+
+        const populateCheckboxFilter = (container, labels, prefix, viewName, filterType) => {
+          container.innerHTML = '';
+          labels
+            .filter((l) => l.name.startsWith(prefix))
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .forEach((l) => {
+              let color = '#cccccc';
+              let icon = 'square';
+              if (filterType === 'team') {
+                const teamName = getTeamFromLabels([l.name]);
+                color = TEAM_COLORS[teamName] || color;
+              } else if (filterType === 'division') {
+                const divName = getDivisionFromLabels([l.name]);
+                color = DIVISION_COLORS[divName] || color;
+                icon = DIVISION_ICONS[divName] || icon;
+              }
+              const id = `filter-${viewName}-${filterType}-${l.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+              const item = document.createElement('div');
+              item.className = 'multiselect-item';
+              item.innerHTML = `
+                <input type="checkbox" id="${id}" name="${viewName}-dynamic-filter" value="${l.name}">
+                <label for="${id}"><i class="material-icons" style="color: ${color};">${icon}</i>${l.name}</label>
+              `;
+              container.appendChild(item);
+            });
+        };
+
+        const populateSimpleSelectFilter = (selectElement, labels, labelPrefix) => {
+          selectElement.innerHTML = '<option value="">Todos</option>';
+          labels
+            .filter((l) => l.name.startsWith(labelPrefix))
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .forEach((l) => {
+              const option = document.createElement('option');
+              option.value = l.name;
+              option.textContent = l.name;
+              selectElement.appendChild(option);
+            });
+        };
+
+        const filterItemsByLabels = (items, selectedTeams, selectedDivisions) => {
+          if (selectedTeams.length === 0 && selectedDivisions.length === 0) {
+            return items;
+          }
+          return items.filter((item) => {
+            const hasTeam = selectedTeams.length === 0 || selectedTeams.some((teamLabel) => item.labels.includes(teamLabel));
+            const hasDivision = selectedDivisions.length === 0 || selectedDivisions.some((divLabel) => item.labels.includes(divLabel));
+            return hasTeam && hasDivision;
+          });
+        };
+
+        const renderNoResultsRow = (tbody, colSpan, message = 'No se encontraron resultados.') => {
+          tbody.innerHTML = '';
+          const row = tbody.insertRow();
+          const cell = row.insertCell();
+          cell.colSpan = colSpan;
+          cell.textContent = message;
+          cell.style.textAlign = 'center';
+        };
+
+        const handleFormSubmit = async (form, asyncAction) => {
+          const button = form.querySelector('button[type="submit"]');
+          const originalButtonHtml = button.innerHTML;
+          button.disabled = true;
+          button.innerHTML = '<i class="material-icons">sync</i>Procesando...';
+
+          try {
+            await asyncAction();
+          } catch (error) {
+            showToast(`Error: ${error.message}`, 'error');
+            console.error(error);
+          } finally {
+            button.disabled = false;
+            button.innerHTML = originalButtonHtml;
+          }
+        };
+
+        // =================================================================
+        // MÓDULO: LÓGICA PRINCIPAL Y NAVEGACIÓN (app.js)
+        // =================================================================
+        const navLinks = document.querySelectorAll('.nav-link');
+        const views = document.querySelectorAll('.view');
+        const viewInitializers = {};
+        let allGroupLabels = [];
+        const tableSortState = {
+          epics: {key: 'iid', direction: 'desc'},
+          issues: {key: 'iid', direction: 'desc'},
+        };
+
+        const updateNavState = () => {
+          navLinks.forEach((link) => {
+            if (link.dataset.view !== 'config') {
+              link.classList.toggle('disabled', !gitlabClient.config.isAuthenticated);
+            }
+          });
+        };
+
+        const updateConnectionStatus = (status, groupPath = '') => {
+          const iconEl = document.getElementById('connection-status-icon');
+          const textEl = document.getElementById('connection-status-text');
+          const groupName = getGroupNameFromPath(groupPath);
+
+          iconEl.className = 'material-icons'; // Reset classes
+          switch (status) {
+            case 'connected':
+              iconEl.classList.add('status-connected');
+              iconEl.textContent = 'wifi';
+              textEl.textContent = `Conectado a ${groupName}`;
+              break;
+            case 'disconnected':
+              iconEl.classList.add('status-disconnected');
+              iconEl.textContent = 'wifi_off';
+              textEl.textContent = `Error en ${groupName}`;
+              break;
+            default:
+              iconEl.classList.add('status-unknown');
+              iconEl.textContent = 'wifi_off';
+              textEl.textContent = 'Desconectado';
+              break;
+          }
+        };
+
+        const addSortFunctionality = (tableId, stateKey, renderFn) => {
+          const headers = document.querySelectorAll(`#${tableId} th.sortable`);
+          headers.forEach((th) => {
+            th.addEventListener('click', () => {
+              const key = th.dataset.sortKey;
+              const state = tableSortState[stateKey];
+              if (state.key === key) {
+                if (state.direction === 'asc') state.direction = 'desc';
+                else if (state.direction === 'desc') state.key = null; // Reset
+                else state.direction = 'asc';
+              } else {
+                state.key = key;
+                state.direction = 'asc';
+              }
+              renderFn();
+            });
+          });
+        };
+
+        const switchView = async (viewId) => {
+          views.forEach((view) => view.classList.remove('active'));
+          document.getElementById(`view-${viewId}`).classList.add('active');
+
+          navLinks.forEach((link) => {
+            link.classList.toggle('active', link.dataset.view === viewId);
+          });
+
+          if (gitlabClient.config.isAuthenticated && viewInitializers[viewId]) {
+            if (allGroupLabels.length === 0) {
+              try {
+                allGroupLabels = await gitlabClient.getLabels();
+              } catch (error) {
+                showToast(`Error al cargar labels globales: ${error.message}`, 'error');
+                return;
+              }
+            }
+            viewInitializers[viewId]();
+          }
+        };
+
+        navLinks.forEach((link) => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!link.classList.contains('disabled')) {
+              switchView(link.dataset.view);
+            }
+          });
+        });
+
+        // =================================================================
+        // VISTA: CONFIGURACIÓN (view-config.js)
+        // =================================================================
+        const configForm = document.getElementById('config-form');
+        const apiUrlInput = document.getElementById('gitlab-api-url');
+        const tokenInput = document.getElementById('gitlab-token');
+        const groupPathSelect = document.getElementById('gitlab-group-path-select');
+        const otherGroupPathContainer = document.getElementById('gitlab-group-path-other-container');
+        const otherGroupPathInput = document.getElementById('gitlab-group-path-other');
+        const configSubmitButton = configForm.querySelector('button[type="submit"]');
+
+        const updateConfigFormUI = (config) => {
+          if (config && config.token && config.groupPath) {
+            tokenInput.value = config.token;
+            const isPredefined = Array.from(groupPathSelect.options).some((opt) => opt.value === config.groupPath);
+            if (isPredefined) {
+              groupPathSelect.value = config.groupPath;
+              otherGroupPathContainer.style.display = 'none';
+            } else {
+              groupPathSelect.value = 'other';
+              otherGroupPathContainer.style.display = 'block';
+              otherGroupPathInput.value = config.groupPath;
+            }
+            configSubmitButton.innerHTML = '<i class="material-icons">update</i>Validar y Actualizar';
+          } else {
+            configSubmitButton.innerHTML = '<i class="material-icons">save</i>Validar y Guardar';
+          }
+        };
+
+        groupPathSelect.addEventListener('change', () => {
+          otherGroupPathContainer.style.display = groupPathSelect.value === 'other' ? 'block' : 'none';
+        });
+
+        configForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const existingConfig = loadConfigFromLocalStorage();
+          if (existingConfig && existingConfig.token) {
+            if (!confirm('Ya existe una configuración guardada. ¿Desea sobreescribirla?')) {
+              return;
+            }
+          }
+
+          handleFormSubmit(configForm, async () => {
+            const apiUrl = apiUrlInput.value;
+            const token = tokenInput.value;
+            const groupPath = groupPathSelect.value === 'other' ? otherGroupPathInput.value : groupPathSelect.value;
+
+            await gitlabClient.validateConnection(apiUrl, token);
+            await gitlabClient.getGroupIdByPath(groupPath);
+            gitlabClient.config.isAuthenticated = true;
+
+            saveConfigToLocalStorage({token, groupPath});
+            showToast('Conexión exitosa. Configuración guardada.', 'success');
+            updateConfigFormUI({token, groupPath});
+            updateConnectionStatus('connected', groupPath);
+            allGroupLabels = [];
+            updateNavState();
+            switchView('epics');
+          });
+        });
+
+        // =================================================================
+        // VISTA: GESTIONAR MILESTONES (view-milestones.js)
+        // =================================================================
+        const milestonesView = {
+          loader: document.getElementById('milestones-loader'),
+          table: document.getElementById('milestones-table'),
+          tableBody: document.querySelector('#milestones-table tbody'),
+          selectAllCheckbox: document.getElementById('milestones-select-all'),
+          stateFilter: document.getElementById('milestones-state-filter'),
+          filterBtn: document.getElementById('milestones-filter-btn'),
+          actionsContainer: document.getElementById('milestones-actions'),
+          closeBtn: document.getElementById('milestones-close-btn'),
+          createNextBtn: document.getElementById('milestones-create-next-btn'),
+          createSection: document.getElementById('create-next-milestone-section'),
+          createForm: document.getElementById('create-next-milestone-form'),
+          newVersionInput: document.getElementById('new-milestone-version'),
+          newStartDateInput: document.getElementById('new-milestone-start-date'),
+          newDueDateInput: document.getElementById('new-milestone-due-date'),
+          data: [],
+        };
+
+        function updateMilestoneActionButtons() {
+          const selectedCount = milestonesView.tableBody.querySelectorAll('input[type="checkbox"]:checked').length;
+          milestonesView.closeBtn.disabled = selectedCount === 0;
+          milestonesView.createNextBtn.disabled = selectedCount === 0;
+          milestonesView.actionsContainer.style.display = milestonesView.data.length > 0 ? 'flex' : 'none';
+        }
+
+        async function renderMilestones() {
+          toggleLoading(milestonesView.loader, milestonesView.table, true);
+          milestonesView.createSection.style.display = 'none';
+          try {
+            const stateFilterValue = milestonesView.stateFilter.value;
+            const params = {include_descendants: true};
+            if (stateFilterValue === 'opened') {
+              params.state = 'active';
+            } else {
+              params.state = 'all';
+            }
+
+            let fetchedMilestones = await gitlabClient.getMilestones(params);
+
+            if (stateFilterValue === 'expired') {
+              milestonesView.data = fetchedMilestones.filter((m) => m.expired);
+            } else {
+              milestonesView.data = fetchedMilestones;
+            }
+
+            milestonesView.tableBody.innerHTML = '';
+            if (milestonesView.data.length === 0) {
+              renderNoResultsRow(milestonesView.tableBody, 5, 'No se encontraron milestones con los filtros seleccionados.');
+            } else {
+              milestonesView.data.forEach((m) => {
+                const row = milestonesView.tableBody.insertRow();
+                let stateIcon;
+                if (m.state === 'closed') {
+                  stateIcon = `<i class="material-icons" style="color: var(--color-error);" title="Cerrada">cancel</i>`;
+                } else if (m.expired) {
+                  stateIcon = `<i class="material-icons" style="color: var(--color-warning);" title="Expirada">warning</i>`;
+                } else {
+                  stateIcon = `<i class="material-icons" style="color: var(--color-accent);" title="Activa">play_circle_outline</i>`;
+                }
+                row.innerHTML = `
+                  <td><input type="checkbox" data-id="${m.id}"></td>
+                  <td><a href="${m.web_url}" target="_blank">${m.title}</a></td>
+                  <td>${stateIcon}</td>
+                  <td>${m.start_date || 'N/A'}</td>
+                  <td>${m.due_date || 'N/A'}</td>
+                `;
+              });
+            }
+          } catch (error) {
+            showToast(`Error al cargar milestones: ${error.message}`, 'error');
+            renderNoResultsRow(milestonesView.tableBody, 5, 'Error al cargar datos.');
+          } finally {
+            toggleLoading(milestonesView.loader, milestonesView.table, false);
+            updateMilestoneActionButtons();
+          }
+        }
+
+        milestonesView.filterBtn.addEventListener('click', renderMilestones);
+
+        milestonesView.tableBody.addEventListener('change', (e) => {
+          if (e.target.type === 'checkbox') {
+            updateMilestoneActionButtons();
+          }
+        });
+
+        milestonesView.selectAllCheckbox.addEventListener('change', (e) => {
+          milestonesView.tableBody.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+            cb.checked = e.target.checked;
+          });
+          updateMilestoneActionButtons();
+        });
+
+        milestonesView.closeBtn.addEventListener('click', async () => {
+          const selectedIds = Array.from(milestonesView.tableBody.querySelectorAll('input:checked')).map((cb) => parseInt(cb.dataset.id));
+          const milestonesToClose = milestonesView.data.filter((m) => selectedIds.includes(m.id));
+          const confirmationMessage = `¿Está seguro de que desea cerrar las siguientes ${milestonesToClose.length} milestones?\n\n${milestonesToClose
+            .map((m) => `- ${m.title}`)
+            .join('\n')}`;
+
+          if (confirm(confirmationMessage)) {
+            try {
+              const promises = milestonesToClose.map((m) => gitlabClient.updateMilestone(m.group_id, m.id, {state_event: 'close'}));
+              await Promise.all(promises);
+              showToast(`${milestonesToClose.length} milestones cerradas exitosamente.`, 'success');
+              renderMilestones();
+            } catch (error) {
+              showToast(`Error al cerrar milestones: ${error.message}`, 'error');
+            }
+          }
+        });
+
+        milestonesView.createNextBtn.addEventListener('click', () => {
+          const selectedIds = Array.from(milestonesView.tableBody.querySelectorAll('input:checked')).map((cb) => parseInt(cb.dataset.id));
+          const selectedMilestones = milestonesView.data
+            .filter((m) => selectedIds.includes(m.id) && !m.title.includes('NoPlan'))
+            .map((m) => {
+              const versionMatch = m.title.match(/v(\d+\.\d+\.\d+)/);
+              return {...m, version: versionMatch ? versionMatch[1] : null};
+            });
+
+          if (selectedMilestones.length === 0) {
+            showToast('No hay milestones válidas seleccionadas para crear la siguiente versión.', 'warning');
+            return;
+          }
+
+          const firstVersion = selectedMilestones[0].version;
+          if (!firstVersion || !selectedMilestones.every((m) => m.version === firstVersion)) {
+            showToast('Error: Las milestones seleccionadas pertenecen a versiones diferentes.', 'error');
+            return;
+          }
+
+          const versionParts = firstVersion.split('.');
+          const newVersion = `${versionParts[0]}.${parseInt(versionParts[1]) + 1}.${versionParts[2]}`;
+
+          const latestDueDate = selectedMilestones.reduce((latest, m) => {
+            const current = new Date(m.due_date);
+            return current > latest ? current : latest;
+          }, new Date(0));
+
+          const newStartDate = new Date(latestDueDate);
+          newStartDate.setDate(newStartDate.getDate() + 1);
+          const newDueDate = new Date(newStartDate);
+          newDueDate.setDate(newDueDate.getDate() + 6);
+
+          milestonesView.newVersionInput.value = newVersion;
+          milestonesView.newStartDateInput.value = newStartDate.toISOString().split('T')[0];
+          milestonesView.newDueDateInput.value = newDueDate.toISOString().split('T')[0];
+          milestonesView.createSection.style.display = 'block';
+        });
+
+        milestonesView.createForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleFormSubmit(milestonesView.createForm, async () => {
+            const selectedIds = Array.from(milestonesView.tableBody.querySelectorAll('input:checked')).map((cb) => parseInt(cb.dataset.id));
+            const teamsToCreateFor = [
+              ...new Map(
+                milestonesView.data
+                  .filter((m) => selectedIds.includes(m.id) && !m.title.includes('NoPlan'))
+                  .map((m) => {
+                    const teamName = m.title.split(' - ')[1];
+                    return [teamName, {team: teamName, groupId: m.group_id}];
+                  })
+              ).values(),
+            ];
+
+            const newVersion = milestonesView.newVersionInput.value;
+            const newStartDate = milestonesView.newStartDateInput.value;
+            const newDueDate = milestonesView.newDueDateInput.value;
+
+            const confirmationMessage = `Se crearán ${
+              teamsToCreateFor.length
+            } milestones para la versión ${newVersion} (${newStartDate} a ${newDueDate}) para los equipos:\n\n${teamsToCreateFor
+              .map((t) => `- ${t.team}`)
+              .join('\n')}\n\n¿Desea continuar?`;
+
+            if (confirm(confirmationMessage)) {
+              const promises = teamsToCreateFor.map((t) => {
+                const payload = {
+                  title: `v${newVersion} Bgur - ${t.team}`,
+                  start_date: newStartDate,
+                  due_date: newDueDate,
+                };
+                return gitlabClient.createMilestone(t.groupId, payload);
+              });
+              await Promise.all(promises);
+              showToast('Nuevas milestones creadas exitosamente.', 'success');
+              milestonesView.createSection.style.display = 'none';
+              renderMilestones();
+            }
+          });
+        });
+
+        viewInitializers['gestionar-milestones'] = () => {
+          renderNoResultsRow(milestonesView.tableBody, 5, 'Ajuste los filtros y haga clic en "Filtrar" para buscar.');
+          milestonesView.actionsContainer.style.display = 'none';
+        };
+
+        // =================================================================
+        // VISTA: ISSUES PARA PASE (view-issues-pase.js)
+        // =================================================================
+        const issuesPaseForm = document.getElementById('issues-pase-form');
+        const issuesResultsContainer = document.getElementById('issues-pase-results');
+        const issuesOutputContainer = document.getElementById('issues-pase-output');
+        const issuesPaseLoader = document.getElementById('issues-pase-loader');
+        const dbWarningContainer = document.getElementById('issues-pase-db-warning');
+        const copyBtn = document.getElementById('copy-issues-btn');
+        let markdownOutput = '';
+
+        viewInitializers['issues-pase-prod'] = () => {
+          populateCheckboxFilter(document.getElementById('issues-divisions-multiselect'), allGroupLabels, 'División -', 'pase', 'division');
+          populateCheckboxFilter(document.getElementById('issues-teams-multiselect'), allGroupLabels, 'Equipo::', 'pase', 'team');
+          issuesResultsContainer.style.display = 'none';
+          dbWarningContainer.style.display = 'none';
+          issuesOutputContainer.innerHTML = '';
+          markdownOutput = '';
+        };
+
+        issuesPaseForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleFormSubmit(issuesPaseForm, async () => {
+            issuesResultsContainer.style.display = 'block';
+            toggleLoading(issuesPaseLoader, issuesOutputContainer, true);
+            dbWarningContainer.style.display = 'none';
+            issuesOutputContainer.innerHTML = '';
+            markdownOutput = '';
+
+            const selectedDivisions = Array.from(document.querySelectorAll('#issues-divisions-multiselect input:checked')).map((cb) => cb.value);
+            const selectedTeams = Array.from(document.querySelectorAll('#issues-teams-multiselect input:checked')).map((cb) => cb.value);
+
+            if (selectedDivisions.length === 0 || selectedTeams.length === 0) {
+              showToast('Debes seleccionar al menos una división y un equipo.', 'warning');
+              toggleLoading(issuesPaseLoader, issuesOutputContainer, false);
+              return;
+            }
+
+            const allIssues = await gitlabClient.getIssues({labels: 'Estado issue::Sin desplegar'});
+            const filteredIssues = filterItemsByLabels(allIssues, selectedTeams, selectedDivisions);
+
+            const needsDbIntervention = filteredIssues.some((issue) => issue.labels.includes('Incluye: Base de datos'));
+            if (needsDbIntervention) {
+              dbWarningContainer.style.display = 'flex';
+            }
+
+            if (filteredIssues.length === 0) {
+              issuesOutputContainer.innerHTML = '<h3>No se encontraron issues que cumplan con los criterios.</h3>';
+            } else {
+              const issuesByProject = {};
+              for (const issue of filteredIssues) {
+                const project = await gitlabClient.getProjectDetails(issue.project_id);
+                const projectName = project.path;
+                if (!issuesByProject[projectName]) issuesByProject[projectName] = [];
+                issuesByProject[projectName].push(issue);
+              }
+
+              let htmlOutput = '';
+              for (const projectName in issuesByProject) {
+                htmlOutput += `<strong>* ${projectName.toUpperCase()}</strong>\n`;
+                markdownOutput += `* ${projectName.toUpperCase()}\n`;
+                issuesByProject[projectName].forEach((issue) => {
+                  htmlOutput += `&gt; <a href="${issue.web_url}" target="_blank">[${issue.title}]</a>\n`;
+                  markdownOutput += `> [${issue.title}](${issue.web_url})\n`;
+                });
+                htmlOutput += '\n';
+                markdownOutput += '\n';
+              }
+              issuesOutputContainer.innerHTML = htmlOutput;
+            }
+            toggleLoading(issuesPaseLoader, issuesOutputContainer, false);
+          });
+        });
+
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard
+            .writeText(markdownOutput)
+            .then(() => showToast('Listado en formato Markdown copiado al portapapeles.', 'success'))
+            .catch(() => showToast('Error al copiar.', 'error'));
+        });
+
+        // =================================================================
+        // VISTA: ISSUE DE VERSIÓN (view-issue-version.js)
+        // =================================================================
+        const inventoryDetails = document.getElementById('latest-inventory-issue-details');
+        const inventoryLoader = document.getElementById('inventory-issue-loader');
+        const cloneBtn = document.getElementById('clone-issue-btn');
+        let latestInventoryIssue = null;
+
+        viewInitializers['crear-issue-version'] = async () => {
+          toggleLoading(inventoryLoader, inventoryDetails, true);
+          cloneBtn.disabled = true;
+          try {
+            const issues = await gitlabClient.getInventoryIssues();
+            if (issues.length === 0) throw new Error('No se encontraron issues de inventario.');
+
+            latestInventoryIssue = issues.sort((a, b) => {
+              const vA = a.title.match(/(\d+\.\d+\.x)/);
+              const vB = b.title.match(/(\d+\.\d+\.x)/);
+              if (!vA || !vB) return 0;
+              return compareVersions(vB[1], vA[1]);
+            })[0];
+
+            if (!latestInventoryIssue) throw new Error('No se pudo identificar una issue de inventario válida.');
+
+            inventoryDetails.innerHTML = `
+                <p><strong>Título:</strong> ${latestInventoryIssue.title}</p>
+                <p><strong>Fecha de Vencimiento:</strong> ${latestInventoryIssue.due_date || 'N/A'}</p>
+                <p><strong>URL:</strong> <a href="${latestInventoryIssue.web_url}" target="_blank">${latestInventoryIssue.web_url}</a></p>
+            `;
+            cloneBtn.disabled = false;
+          } catch (error) {
+            showToast(`Error al cargar issue: ${error.message}`, 'error');
+            inventoryDetails.innerHTML = `<p style="color:var(--color-error)">${error.message}</p>`;
+          } finally {
+            toggleLoading(inventoryLoader, inventoryDetails, false);
+          }
+        };
+
+        cloneBtn.addEventListener('click', async () => {
+          if (!latestInventoryIssue) return;
+
+          const confirmation = confirm(`Se va a clonar la issue "${latestInventoryIssue.title}". ¿Desea continuar?`);
+          if (!confirmation) return;
+
+          cloneBtn.disabled = true;
+          cloneBtn.innerHTML = '<i class="material-icons">sync</i>Clonando...';
+          try {
+            const versionMatch = latestInventoryIssue.title.match(/(\d+)\.(\d+)\.x/);
+            const newVersion = `${versionMatch[1]}.${parseInt(versionMatch[2]) + 1}.x`;
+
+            const payload = {
+              title: `Inventario de versión ${newVersion}`,
+              description: latestInventoryIssue.description,
+              labels: latestInventoryIssue.labels.join(','),
+            };
+
+            if (latestInventoryIssue.due_date) {
+              const newDueDate = new Date(latestInventoryIssue.due_date + 'T00:00:00');
+              newDueDate.setDate(newDueDate.getDate() + 8);
+              payload.due_date = newDueDate.toISOString().split('T')[0];
+            }
+
+            await gitlabClient.cloneIssue(latestInventoryIssue.project_id, payload);
+            showToast(`Issue clonada a versión ${newVersion}.`, 'success');
+            viewInitializers['crear-issue-version']();
+          } catch (error) {
+            showToast(`Error al clonar: ${error.message}`, 'error');
+          } finally {
+            cloneBtn.disabled = false;
+            cloneBtn.innerHTML = '<i class="material-icons">control_point_duplicate</i>Clonar e Incrementar Versión';
+          }
+        });
+
+        // =================================================================
+        // VISTA: VALIDAR ISSUES (view-validate-issues.js)
+        // =================================================================
+        const validateForm = document.getElementById('validate-issues-form');
+        const validateResultsContainer = document.getElementById('validate-issues-results');
+        const validateLoader = document.getElementById('validate-issues-loader');
+        const validateOutput = document.getElementById('validate-issues-output');
+
+        const validateClosedIssue = (issue) => {
+          const errors = [];
+          if (issue.task_completion_status.count > 0 && issue.task_completion_status.completed_count !== issue.task_completion_status.count) {
+            errors.push(`Tareas incompletas (${issue.task_completion_status.completed_count} de ${issue.task_completion_status.count})`);
+          }
+          if (issue.weight === null || issue.weight === 0) {
+            errors.push('No tiene peso (weight) informado');
+          }
+          return errors;
+        };
+
+        viewInitializers['validate-project-issues'] = async () => {
+          try {
+            const epics = await gitlabClient.getEpics({state: 'opened'});
+            const datalist = document.getElementById('validate-epics-list');
+            datalist.innerHTML = '';
+            epics
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .forEach((e) => {
+                const option = document.createElement('option');
+                option.value = `(${e.iid}) ${e.title}`;
+                datalist.appendChild(option);
+              });
+          } catch (error) {
+            showToast(`Error al cargar la lista de epics: ${error.message}`, 'error');
+          }
+        };
+
+        validateForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleFormSubmit(validateForm, async () => {
+            validateResultsContainer.style.display = 'block';
+            validateLoader.style.display = 'block';
+            validateOutput.innerHTML = '';
+
+            const prefix = document.getElementById('validate-project-prefix').value;
+            const epicSearch = document.getElementById('validate-epic-search').value;
+            const criteriaFilter = document.getElementById('validate-criteria-filter').value;
+            const epicIdMatch = epicSearch.match(/\((\d+)\)/);
+            const epicId = epicIdMatch ? epicIdMatch[1] : null;
+
+            if (!epicId && !prefix) {
+              showToast('Debe proporcionar un prefijo de proyecto o seleccionar una épica.', 'warning');
+              validateLoader.style.display = 'none';
+              return;
+            }
+
+            let issuesToValidate = [];
+            if (epicId) {
+              issuesToValidate.push(...(await gitlabClient.getEpicIssues(epicId)));
+            } else if (prefix) {
+              const epics = await gitlabClient.getEpics({search: prefix});
+              const foundEpics = epics.filter((epic) => epic.title.startsWith(prefix));
+              if (foundEpics.length === 0) {
+                validateOutput.innerHTML = `<p>No se encontraron épicas con el prefijo "${prefix}".</p>`;
+                validateLoader.style.display = 'none';
+                return;
+              }
+              for (const epic of foundEpics) {
+                issuesToValidate.push(...(await gitlabClient.getEpicIssues(epic.iid)));
+              }
+            }
+
+            const closedIssues = issuesToValidate.filter((i) => i.state === 'closed');
+            if (closedIssues.length === 0) {
+              validateOutput.innerHTML = `<p>No se encontraron issues cerradas para validar.</p>`;
+            } else {
+              let html = `<h3>Validando ${closedIssues.length} issue(s) cerrada(s)</h3>`;
+              const issuesToDisplay = closedIssues
+                .map((issue) => ({issue, errors: validateClosedIssue(issue)}))
+                .filter(
+                  ({errors}) =>
+                    criteriaFilter === 'all' || (criteriaFilter === 'yes' && errors.length === 0) || (criteriaFilter === 'no' && errors.length > 0)
+                )
+                .map(({issue, errors}) => {
+                  const meetsCriteria = errors.length === 0;
+                  let itemHtml = `<div class="list-item">`;
+                  if (!meetsCriteria) {
+                    itemHtml += `<p style="color:var(--color-error)">❌ <a href="${
+                      issue.web_url
+                    }" target="_blank" rel="noopener noreferrer"><strong>Issue #${issue.iid} ("${
+                      issue.title
+                    }")</strong></a> no cumple:</p><ul class="error-list">${errors.map((err) => `<li>${err}</li>`).join('')}</ul>`;
+                  } else {
+                    itemHtml += `<p style="color:var(--color-accent)">✅ <a href="${issue.web_url}" target="_blank" rel="noopener noreferrer"><strong>Issue #${issue.iid} ("${issue.title}")</strong></a> cumple.</p>`;
+                  }
+                  return itemHtml + `</div>`;
+                });
+
+              if (issuesToDisplay.length > 0) {
+                validateOutput.innerHTML = html + issuesToDisplay.join('');
+              } else {
+                validateOutput.innerHTML = html + '<p>No hay issues que cumplan con el filtro de criterios seleccionado.</p>';
+              }
+            }
+            validateLoader.style.display = 'none';
+          });
+        });
+
+        // =================================================================
+        // VISTA: ITERACIONES (view-iterations.js)
+        // =================================================================
+        const iterationsTable = document.getElementById('iterations-table');
+        const iterationsTableBody = iterationsTable.querySelector('tbody');
+        const iterationsLoader = document.getElementById('iterations-loader');
+        const iterationsLabelFilter = document.getElementById('iterations-label-filter');
+        const iterationsChartContainer = document.getElementById('iterations-chart-container');
+        let iterationsChart = null;
+
+        async function renderIterationsData() {
+          toggleLoading(iterationsLoader, iterationsTable, true);
+          iterationsChartContainer.style.display = 'none';
+          if (iterationsChart) iterationsChart.destroy();
+
+          try {
+            const label = iterationsLabelFilter.value;
+            const allIterations = await gitlabClient.getIterations();
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+            const recentIterations = allIterations.filter((i) => i.due_date && new Date(i.due_date) > sixMonthsAgo).sort((a, b) => b.id - a.id);
+
+            const iterationPromises = recentIterations.map(async (iteration) => {
+              const issues = await gitlabClient.getIterationIssues(iteration.id, label);
+              return {
+                ...iteration,
+                completedCount: issues.length,
+                completedWeight: issues.reduce((sum, issue) => sum + (issue.weight || 0), 0),
+              };
+            });
+            const iterationsWithData = (await Promise.all(iterationPromises)).filter((iter) => iter.completedCount > 0);
+
+            if (iterationsWithData.length === 0) {
+              renderNoResultsRow(iterationsTableBody, 4, 'No se encontraron iteraciones con issues cerradas en el periodo y filtro seleccionados.');
+            } else {
+              iterationsTableBody.innerHTML = '';
+              iterationsWithData.forEach((iter) => {
+                const row = iterationsTableBody.insertRow();
+                row.innerHTML = `<td><a href="${iter.web_url}" target="_blank">${iter.id}</a></td><td>${iter.start_date} - ${iter.due_date}</td><td>${iter.completedCount}</td><td>${iter.completedWeight}</td>`;
+              });
+
+              iterationsChartContainer.style.display = 'block';
+              const chartData = [...iterationsWithData].reverse();
+              iterationsChart = new Chart(document.getElementById('iterations-chart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                  labels: chartData.map((d) => `${d.start_date} - ${d.due_date}`),
+                  datasets: [
+                    {
+                      label: 'Issues Completadas',
+                      data: chartData.map((d) => d.completedCount),
+                      backgroundColor: 'rgba(92, 136, 218, 0.6)',
+                      yAxisID: 'yIssues',
+                    },
+                    {
+                      label: 'Peso Completado',
+                      data: chartData.map((d) => d.completedWeight),
+                      type: 'line',
+                      borderColor: 'rgba(252, 195, 23, 1)',
+                      yAxisID: 'yWeight',
+                    },
+                  ],
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    yIssues: {type: 'linear', display: true, position: 'left', title: {display: true, text: 'Nº de Issues'}, beginAtZero: true},
+                    yWeight: {
+                      type: 'linear',
+                      display: true,
+                      position: 'right',
+                      title: {display: true, text: 'Peso Total'},
+                      grid: {drawOnChartArea: false},
+                      beginAtZero: true,
+                    },
+                  },
+                },
+              });
+            }
+          } catch (error) {
+            showToast(`Error al cargar datos de iteraciones: ${error.message}`, 'error');
+            renderNoResultsRow(iterationsTableBody, 4, 'Error al cargar datos.');
+          } finally {
+            toggleLoading(iterationsLoader, iterationsTable, false);
+          }
+        }
+
+        viewInitializers['iterations'] = () => {
+          populateSimpleSelectFilter(iterationsLabelFilter, allGroupLabels, 'Equipo::');
+          renderIterationsData();
+        };
+
+        iterationsLabelFilter.addEventListener('change', renderIterationsData);
+
+        // =================================================================
+        // VISTA: EPICS (view-epics.js)
+        // =================================================================
+        const epicsTable = document.getElementById('epics-table');
+        const epicsTableBody = epicsTable.querySelector('tbody');
+        const epicsLoader = document.getElementById('epics-loader');
+        const epicsFilters = {
+          title: document.getElementById('epics-title-filter'),
+          state: document.getElementById('epics-state-filter'),
+          labelContainer: document.getElementById('epics-label-filter'),
+          filterBtn: document.getElementById('epics-filter-btn'),
+        };
+        let epicsData = [];
+
+        async function renderEpics() {
+          toggleLoading(epicsLoader, epicsTable, true);
+          try {
+            const selectedTeams = Array.from(epicsFilters.labelContainer.querySelectorAll('input:checked')).map((cb) => cb.value);
+            const params = {
+              state: epicsFilters.state.value,
+              search: epicsFilters.title.value,
+            };
+
+            if (selectedTeams.length === 1) {
+              params.label_name = selectedTeams;
+            }
+
+            let fetchedEpics = await gitlabClient.getEpics(params);
+
+            if (selectedTeams.length > 1) {
+              epicsData = filterItemsByLabels(fetchedEpics, selectedTeams, []);
+            } else {
+              epicsData = fetchedEpics;
+            }
+
+            const sort = tableSortState.epics;
+            if (sort.key) {
+              epicsData.sort((a, b) => {
+                let valA = a[sort.key];
+                let valB = b[sort.key];
+                if (sort.key === 'team') {
+                  valA = getTeamFromLabels(a.labels);
+                  valB = getTeamFromLabels(b.labels);
+                }
+                if (valA < valB) return sort.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sort.direction === 'asc' ? 1 : -1;
+                return 0;
+              });
+            }
+
+            const teamColumn = document.querySelector('#epics-table th[data-sort-key="team"]');
+            teamColumn.style.display = selectedTeams.length > 1 ? 'table-cell' : 'none';
+
+            if (epicsData.length === 0) {
+              renderNoResultsRow(epicsTableBody, 4, 'No se encontraron epics con los filtros seleccionados.');
+            } else {
+              epicsTableBody.innerHTML = '';
+              epicsData.forEach((epic) => {
+                const row = epicsTableBody.insertRow();
+                const teamName = getTeamFromLabels(epic.labels);
+                const teamColor = teamName ? TEAM_COLORS[teamName] : 'grey';
+                const stateIcon =
+                  epic.state === 'opened'
+                    ? `<i class="material-icons" style="color: var(--color-accent);" title="Abierto">lock_open</i>`
+                    : `<i class="material-icons" style="color: var(--color-error);" title="Cerrado">lock</i>`;
+
+                row.innerHTML = `
+                  <td><a href="${epic.web_url}" target="_blank">${epic.iid}</a></td>
+                  <td style="display: ${teamColumn.style.display};"><i class="material-icons" style="color: ${teamColor};" title="Equipo ${teamName}">square</i></td>
+                  <td>${epic.title}</td>
+                  <td>${stateIcon}</td>
+                `;
+              });
+            }
+
+            document.querySelectorAll('#epics-table th.sortable .sort-icon').forEach((i) => i.remove());
+            if (sort.key) {
+              const th = document.querySelector(`#epics-table th[data-sort-key="${sort.key}"]`);
+              th.innerHTML += `<i class="material-icons sort-icon">${sort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward'}</i>`;
+            }
+          } catch (error) {
+            showToast(`Error al cargar epics: ${error.message}`, 'error');
+            renderNoResultsRow(epicsTableBody, 4, 'Error al cargar datos.');
+          } finally {
+            toggleLoading(epicsLoader, epicsTable, false);
+          }
+        }
+
+        viewInitializers['epics'] = () => {
+          populateCheckboxFilter(epicsFilters.labelContainer, allGroupLabels, 'Equipo::', 'epics', 'team');
+          addSortFunctionality('epics-table', 'epics', renderEpics);
+          renderNoResultsRow(epicsTableBody, 4, 'Ajuste los filtros y haga clic en "Filtrar" para buscar.');
+        };
+
+        epicsFilters.filterBtn.addEventListener('click', renderEpics);
+
+        // =================================================================
+        // VISTA: ISSUES (view-issues.js)
+        // =================================================================
+        const issuesTable = document.getElementById('issues-table');
+        const issuesTableBody = issuesTable.querySelector('tbody');
+        const issuesLoader = document.getElementById('issues-loader');
+        const issuesFilters = {
+          title: document.getElementById('issues-title-filter'),
+          state: document.getElementById('issues-state-filter'),
+          labelContainer: document.getElementById('issues-label-filter'),
+          divisionContainer: document.getElementById('issues-division-filter'),
+          epicInput: document.getElementById('issues-epic-filter-input'),
+          epicDatalist: document.getElementById('issues-epic-filter-list'),
+          filterBtn: document.getElementById('issues-filter-btn'),
+        };
+        let issuesData = [];
+        let allEpicsForFilter = [];
+
+        async function renderIssues() {
+          toggleLoading(issuesLoader, issuesTable, true);
+          try {
+            const selectedTeams = Array.from(issuesFilters.labelContainer.querySelectorAll('input:checked')).map((cb) => cb.value);
+            const selectedDivisions = Array.from(issuesFilters.divisionContainer.querySelectorAll('input:checked')).map((cb) => cb.value);
+
+            const epicInputValue = issuesFilters.epicInput.value;
+            const selectedEpic = allEpicsForFilter.find((e) => `(ID: ${e.iid}) ${e.title}` === epicInputValue);
+
+            const params = {
+              state: issuesFilters.state.value,
+              search: issuesFilters.title.value,
+              epic_id: selectedEpic ? selectedEpic.iid : null,
+            };
+
+            let fetchedIssues = await gitlabClient.getIssues(params);
+            issuesData = filterItemsByLabels(fetchedIssues, selectedTeams, selectedDivisions);
+
+            const sort = tableSortState.issues;
+            if (sort.key) {
+              issuesData.sort((a, b) => {
+                let valA = a[sort.key];
+                let valB = b[sort.key];
+                if (sort.key === 'team') {
+                  valA = getTeamFromLabels(a.labels);
+                  valB = getTeamFromLabels(b.labels);
+                }
+                if (valA === null) valA = -1;
+                if (valB === null) valB = -1;
+                if (valA < valB) return sort.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sort.direction === 'asc' ? 1 : -1;
+                return 0;
+              });
+            }
+
+            const teamColumn = document.querySelector('#issues-table th[data-sort-key="team"]');
+            teamColumn.style.display = selectedTeams.length > 1 ? 'table-cell' : 'none';
+
+            if (issuesData.length === 0) {
+              renderNoResultsRow(issuesTableBody, 5, 'No se encontraron issues con los filtros seleccionados.');
+            } else {
+              issuesTableBody.innerHTML = '';
+              issuesData.forEach((issue) => {
+                const row = issuesTableBody.insertRow();
+                const teamName = getTeamFromLabels(issue.labels);
+                const teamColor = teamName ? TEAM_COLORS[teamName] : 'grey';
+                const stateIcon =
+                  issue.state === 'opened'
+                    ? `<i class="material-icons" style="color: var(--color-accent);" title="Abierta">lock_open</i>`
+                    : `<i class="material-icons" style="color: var(--color-error);" title="Cerrada">lock</i>`;
+
+                row.innerHTML = `
+                  <td><a href="${issue.web_url}" target="_blank">${issue.iid}</a></td>
+                  <td style="display: ${
+                    teamColumn.style.display
+                  };"><i class="material-icons" style="color: ${teamColor};" title="Equipo ${teamName}">square</i></td>
+                  <td>${issue.title}</td>
+                  <td>${stateIcon}</td>
+                  <td>${issue.weight || 'N/A'}</td>
+                `;
+              });
+            }
+
+            document.querySelectorAll('#issues-table th.sortable .sort-icon').forEach((i) => i.remove());
+            if (sort.key) {
+              const th = document.querySelector(`#issues-table th[data-sort-key="${sort.key}"]`);
+              th.innerHTML += `<i class="material-icons sort-icon">${sort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward'}</i>`;
+            }
+          } catch (error) {
+            showToast(`Error al cargar issues: ${error.message}`, 'error');
+            renderNoResultsRow(issuesTableBody, 5, 'Error al cargar datos.');
+          } finally {
+            toggleLoading(issuesLoader, issuesTable, false);
+          }
+        }
+
+        viewInitializers['issues'] = async () => {
+          populateCheckboxFilter(issuesFilters.labelContainer, allGroupLabels, 'Equipo::', 'issues', 'team');
+          populateCheckboxFilter(issuesFilters.divisionContainer, allGroupLabels, 'División -', 'issues', 'division');
+          addSortFunctionality('issues-table', 'issues', renderIssues);
+          try {
+            allEpicsForFilter = await gitlabClient.getEpics({state: 'all'});
+            issuesFilters.epicDatalist.innerHTML = '';
+            allEpicsForFilter
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .forEach((e) => {
+                const option = document.createElement('option');
+                option.value = `(ID: ${e.iid}) ${e.title}`;
+                issuesFilters.epicDatalist.appendChild(option);
+              });
+          } catch (error) {
+            showToast(`Error al cargar filtro de épicas: ${error.message}`, 'error');
+          }
+          renderNoResultsRow(issuesTableBody, 5, 'Ajuste los filtros y haga clic en "Filtrar" para buscar.');
+        };
+
+        issuesFilters.filterBtn.addEventListener('click', renderIssues);
+
+        // =================================================================
+        // VISTA: GESTIONAR ISSUES DE INVENTARIO (view-inventory-issues.js)
+        // =================================================================
+        const inventoryView = {
+          selectLoader: document.getElementById('inventory-select-loader'),
+          issueSelect: document.getElementById('inventory-issue-select'),
+          openIssueLink: document.getElementById('inventory-issue-open-link'),
+          resultsContainer: document.getElementById('inventory-results-container'),
+          tableLoader: document.getElementById('inventory-table-loader'),
+          table: document.getElementById('inventory-results-table'),
+          tableBody: document.querySelector('#inventory-results-table tbody'),
+          selectAllCheckbox: document.getElementById('inventory-select-all'),
+          teamFilter: document.getElementById('inventory-team-filter'),
+          divisionFilter: document.getElementById('inventory-division-filter'),
+          moveMilestoneBtn: document.getElementById('inventory-move-milestone-btn'),
+          removeLabelBtn: document.getElementById('inventory-remove-label-btn'),
+          milestoneModal: document.getElementById('inventory-milestone-modal'),
+          milestoneForm: document.getElementById('inventory-milestone-form'),
+          milestoneVersionSearch: document.getElementById('inventory-milestone-version-search'),
+          milestoneSelect: document.getElementById('inventory-milestone-select'),
+          milestoneLoader: document.getElementById('inventory-milestone-loader'),
+          milestoneConfirmBtn: document.querySelector('#inventory-milestone-form button[type="submit"]'),
+          inventoryIssues: [],
+          linkedIssues: [],
+        };
+
+        function updateInventoryActionButtons() {
+          const selectedIds = Array.from(inventoryView.tableBody.querySelectorAll('input:checked')).map((cb) => parseInt(cb.dataset.id));
+          const selectedIssues = inventoryView.linkedIssues.filter((i) => selectedIds.includes(i.id));
+          const selectedCount = selectedIssues.length;
+
+          inventoryView.removeLabelBtn.disabled = selectedCount === 0;
+
+          const uniqueTeams = new Set(selectedIssues.map((issue) => getTeamFromLabels(issue.labels)).filter(Boolean));
+
+          if (selectedCount > 0 && uniqueTeams.size === 1) {
+            inventoryView.moveMilestoneBtn.disabled = false;
+            inventoryView.moveMilestoneBtn.title = 'Mover issues seleccionadas a una milestone';
+          } else {
+            inventoryView.moveMilestoneBtn.disabled = true;
+            if (selectedCount === 0) {
+              inventoryView.moveMilestoneBtn.title = '';
+            } else if (uniqueTeams.size > 1) {
+              inventoryView.moveMilestoneBtn.title = 'Solo se pueden mover issues de un único equipo a la vez.';
+            } else {
+              inventoryView.moveMilestoneBtn.title = 'Las issues seleccionadas no tienen equipo asignado.';
+            }
+          }
+        }
+
+        function renderInventoryTable() {
+          const selectedTeams = Array.from(inventoryView.teamFilter.querySelectorAll('input:checked')).map((cb) => cb.value);
+          const selectedDivisions = Array.from(inventoryView.divisionFilter.querySelectorAll('input:checked')).map((cb) => cb.value);
+
+          const filteredIssues = filterItemsByLabels(inventoryView.linkedIssues, selectedTeams, selectedDivisions);
+
+          inventoryView.tableBody.innerHTML = '';
+          if (filteredIssues.length === 0) {
+            renderNoResultsRow(inventoryView.tableBody, 4, 'No hay issues que coincidan con los filtros.');
+          } else {
+            filteredIssues.forEach((issue) => {
+              const row = inventoryView.tableBody.insertRow();
+              const hasSinDesplegarLabel = issue.labels.includes('Estado issue::Sin desplegar');
+              const sinDesplegarIcon = hasSinDesplegarLabel
+                ? `<i class="material-icons" style="color: var(--color-warning);" title="Pendiente de desplegar">hourglass_top</i>`
+                : `<i class="material-icons" style="color: var(--color-accent);" title="Desplegado">check_circle</i>`;
+
+              row.innerHTML = `
+                <td><input type="checkbox" data-id="${issue.id}"></td>
+                <td><a href="${issue.web_url}" target="_blank">#${issue.iid} - ${issue.title}</a></td>
+                <td>${sinDesplegarIcon}</td>
+                <td>${issue.milestone ? issue.milestone.title : 'N/A'}</td>
+              `;
+            });
+          }
+          updateInventoryActionButtons();
+        }
+
+        async function loadLinkedIssues() {
+          const selectedIssueId = inventoryView.issueSelect.value;
+          const selectedIssue = inventoryView.inventoryIssues.find((i) => i.id == selectedIssueId);
+
+          if (!selectedIssue) {
+            inventoryView.resultsContainer.style.display = 'none';
+            inventoryView.openIssueLink.classList.add('disabled');
+            inventoryView.openIssueLink.href = '#';
+            return;
+          }
+
+          inventoryView.openIssueLink.href = selectedIssue.web_url;
+          inventoryView.openIssueLink.classList.remove('disabled');
+
+          inventoryView.resultsContainer.style.display = 'block';
+          toggleLoading(inventoryView.tableLoader, inventoryView.table, true);
+          inventoryView.linkedIssues = [];
+          renderInventoryTable();
+
+          try {
+            const notes = await gitlabClient.getIssueNotes(selectedIssue.project_id, selectedIssue.iid);
+            // Usamos un Map para evitar duplicados y almacenar la ruta del proyecto y el iid.
+            const issueRefs = new Map();
+            const userNotes = notes.filter((note) => !note.system);
+
+            // Regex mejorada para capturar la ruta completa del proyecto y el IID de la URL.
+            const mentionRegex = /https?:\/\/[^\/]+\/([\w\/-]+)\/-\/issues\/(\d+)/g;
+
+            userNotes.forEach((note) => {
+              const matches = [...note.body.matchAll(mentionRegex)];
+              matches.forEach((match) => {
+                const projectPath = match[1];
+                const iid = match[2];
+                if (projectPath && iid) {
+                  const key = `${projectPath}:${iid}`; // Clave única para el Map
+                  if (!issueRefs.has(key)) {
+                    issueRefs.set(key, {projectPath, iid: parseInt(iid)});
+                  }
+                }
+              });
+            });
+
+            if (issueRefs.size === 0) {
+              showToast('No se encontraron menciones a otras issues en los comentarios de los usuarios.', 'warning');
+              inventoryView.linkedIssues = [];
+            } else {
+              // Usamos la nueva función del cliente para obtener cada issue con su ruta de proyecto correcta.
+              const issuePromises = Array.from(issueRefs.values()).map(({projectPath, iid}) =>
+                gitlabClient.getIssueByProjectPathAndIid(projectPath, iid).catch((err) => {
+                  console.warn(`No se pudo cargar la issue ${projectPath}#${iid}: ${err.message}`);
+                  return null; // Si una issue falla, no detenemos todo el proceso.
+                })
+              );
+              const fetchedIssues = await Promise.all(issuePromises);
+              inventoryView.linkedIssues = fetchedIssues.filter((issue) => issue !== null);
+            }
+            renderInventoryTable();
+          } catch (error) {
+            showToast(`Error al cargar issues mencionadas: ${error.message}`, 'error');
+            renderNoResultsRow(inventoryView.tableBody, 4, 'Error al cargar datos.');
+          } finally {
+            toggleLoading(inventoryView.tableLoader, inventoryView.table, false);
+          }
+        }
+
+        viewInitializers['gestionar-issues-inventario'] = async () => {
+          inventoryView.resultsContainer.style.display = 'none';
+          inventoryView.milestoneModal.style.display = 'none';
+          inventoryView.issueSelect.innerHTML = '<option value="">-- Seleccione una issue --</option>';
+          inventoryView.openIssueLink.classList.add('disabled');
+          inventoryView.openIssueLink.href = '#';
+          inventoryView.linkedIssues = [];
+
+          populateCheckboxFilter(inventoryView.teamFilter, allGroupLabels, 'Equipo::', 'inventory', 'team');
+          populateCheckboxFilter(inventoryView.divisionFilter, allGroupLabels, 'División -', 'inventory', 'division');
+
+          toggleLoading(inventoryView.selectLoader, inventoryView.issueSelect, true);
+          try {
+            inventoryView.inventoryIssues = await gitlabClient.getInventoryIssues();
+            inventoryView.inventoryIssues
+              .sort((a, b) => b.iid - a.iid)
+              .forEach((issue) => {
+                const option = document.createElement('option');
+                option.value = issue.id;
+                option.textContent = `#${issue.iid} - ${issue.title}`;
+                inventoryView.issueSelect.appendChild(option);
+              });
+          } catch (error) {
+            showToast(`Error al cargar issues de inventario: ${error.message}`, 'error');
+          } finally {
+            toggleLoading(inventoryView.selectLoader, inventoryView.issueSelect, false);
+          }
+        };
+
+        inventoryView.issueSelect.addEventListener('change', loadLinkedIssues);
+        inventoryView.teamFilter.addEventListener('change', renderInventoryTable);
+        inventoryView.divisionFilter.addEventListener('change', renderInventoryTable);
+        inventoryView.tableBody.addEventListener('change', (e) => {
+          if (e.target.type === 'checkbox') updateInventoryActionButtons();
+        });
+        inventoryView.selectAllCheckbox.addEventListener('change', (e) => {
+          inventoryView.tableBody.querySelectorAll('input[type="checkbox"]').forEach((cb) => (cb.checked = e.target.checked));
+          updateInventoryActionButtons();
+        });
+
+        inventoryView.removeLabelBtn.addEventListener('click', async () => {
+          const selectedIds = Array.from(inventoryView.tableBody.querySelectorAll('input:checked')).map((cb) => parseInt(cb.dataset.id));
+          const issuesToUpdate = inventoryView.linkedIssues.filter((i) => selectedIds.includes(i.id));
+
+          if (issuesToUpdate.length === 0) return;
+
+          const confirmationMessage = `Se quitará la etiqueta "Estado issue::Sin desplegar" a las siguientes ${
+            issuesToUpdate.length
+          } issues:\n\n${issuesToUpdate.map((i) => `- #${i.iid} ${i.title}`).join('\n')}\n\n¿Desea continuar?`;
+
+          if (confirm(confirmationMessage)) {
+            try {
+              const promises = issuesToUpdate.map((issue) => {
+                const newLabels = issue.labels.filter((l) => l !== 'Estado issue::Sin desplegar');
+                return gitlabClient.updateIssue(issue.project_id, issue.iid, {labels: newLabels.join(',')});
+              });
+              await Promise.all(promises);
+              showToast('Etiquetas actualizadas correctamente.', 'success');
+              await loadLinkedIssues();
+            } catch (error) {
+              showToast(`Error al actualizar etiquetas: ${error.message}`, 'error');
+            }
+          }
+        });
+
+        inventoryView.moveMilestoneBtn.addEventListener('click', () => {
+          inventoryView.milestoneModal.style.display = 'block';
+        });
+
+        inventoryView.milestoneVersionSearch.addEventListener('input', async (e) => {
+          const version = e.target.value;
+          inventoryView.milestoneSelect.innerHTML = '';
+          inventoryView.milestoneSelect.disabled = true;
+          inventoryView.milestoneConfirmBtn.disabled = true;
+
+          const selectedIds = Array.from(inventoryView.tableBody.querySelectorAll('input:checked')).map((cb) => parseInt(cb.dataset.id));
+          const selectedIssues = inventoryView.linkedIssues.filter((i) => selectedIds.includes(i.id));
+          const uniqueTeams = new Set(selectedIssues.map((issue) => getTeamFromLabels(issue.labels)).filter(Boolean));
+
+          if (uniqueTeams.size !== 1) return;
+          const targetTeam = uniqueTeams.values().next().value;
+
+          if (version.length < 3) return;
+
+          toggleLoading(inventoryView.milestoneLoader, null, true);
+          try {
+            const milestones = await gitlabClient.getMilestones({search: version, include_descendants: true, state: 'active'});
+            const filteredMilestones = milestones.filter((m) => m.title.includes(targetTeam));
+
+            if (filteredMilestones.length > 0) {
+              filteredMilestones.forEach((m) => {
+                const option = document.createElement('option');
+                option.value = m.id;
+                option.textContent = m.title;
+                inventoryView.milestoneSelect.appendChild(option);
+              });
+              inventoryView.milestoneSelect.disabled = false;
+              inventoryView.milestoneConfirmBtn.disabled = false;
+            } else {
+              showToast(`No se encontraron milestones activas para "${targetTeam}" con la versión "${version}".`, 'warning');
+            }
+          } catch (error) {
+            showToast(`Error buscando milestones: ${error.message}`, 'error');
+          } finally {
+            toggleLoading(inventoryView.milestoneLoader, null, false);
+          }
+        });
+
+        inventoryView.milestoneForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleFormSubmit(inventoryView.milestoneForm, async () => {
+            const selectedIds = Array.from(inventoryView.tableBody.querySelectorAll('input:checked')).map((cb) => parseInt(cb.dataset.id));
+            const issuesToUpdate = inventoryView.linkedIssues.filter((i) => selectedIds.includes(i.id));
+            const milestoneId = inventoryView.milestoneSelect.value;
+            const milestoneTitle = inventoryView.milestoneSelect.options[inventoryView.milestoneSelect.selectedIndex].text;
+
+            if (issuesToUpdate.length === 0) return;
+
+            const confirmationMessage = `Se asignará la milestone "${milestoneTitle}" a las siguientes ${
+              issuesToUpdate.length
+            } issues:\n\n${issuesToUpdate.map((i) => `- #${i.iid} ${i.title}`).join('\n')}\n\n¿Desea continuar?`;
+
+            if (confirm(confirmationMessage)) {
+              try {
+                const promises = issuesToUpdate.map((issue) => gitlabClient.updateIssue(issue.project_id, issue.iid, {milestone_id: milestoneId}));
+                await Promise.all(promises);
+                showToast('Milestones asignadas correctamente.', 'success');
+                inventoryView.milestoneModal.style.display = 'none';
+                inventoryView.milestoneForm.reset();
+                await loadLinkedIssues();
+              } catch (error) {
+                showToast(`Error al asignar milestones: ${error.message}`, 'error');
+              }
+            }
+          });
+        });
+
+        // =================================================================
+        // PUNTO DE ENTRADA DE LA APLICACIÓN
+        // =================================================================
+        const initializeApp = async () => {
+          const themeSwitcher = document.getElementById('theme-switcher-checkbox');
+          const currentTheme = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+          if (currentTheme === 'dark' || (!currentTheme && prefersDark)) {
+            document.body.setAttribute('data-theme', 'dark');
+            themeSwitcher.checked = true;
+          }
+
+          themeSwitcher.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              document.body.setAttribute('data-theme', 'dark');
+              localStorage.setItem('theme', 'dark');
+            } else {
+              document.body.removeAttribute('data-theme');
+              localStorage.setItem('theme', 'light');
+            }
+          });
+
+          const savedConfig = loadConfigFromLocalStorage();
+          updateConfigFormUI(savedConfig);
+
+          if (savedConfig && savedConfig.token && savedConfig.groupPath) {
+            try {
+              const apiUrl = document.getElementById('gitlab-api-url').value;
+              await gitlabClient.validateConnection(apiUrl, savedConfig.token);
+              await gitlabClient.getGroupIdByPath(savedConfig.groupPath);
+              gitlabClient.config.isAuthenticated = true;
+              updateConnectionStatus('connected', savedConfig.groupPath);
+            } catch (error) {
+              gitlabClient.config.isAuthenticated = false;
+              updateConnectionStatus('disconnected', savedConfig.groupPath);
+              showToast('El token o grupo guardado no es válido.', 'error');
+            }
+          } else {
+            updateConnectionStatus('unknown');
+          }
+
+          updateNavState();
+          switchView('config');
+        };
+
+        initializeApp();
+      });
+    </script>
+  </body>
+</html>
